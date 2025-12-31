@@ -31,13 +31,16 @@ public class SecurityExceptionHandler implements AuthenticationEntryPoint, Acces
         sendError(response, ErrorCode.ACCESS_DENIED);
     }
 
-
     private void sendError(HttpServletResponse response, ErrorCode errorCode) throws IOException {
         response.setStatus(errorCode.getStatus().value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding("UTF-8");
 
-        ApiResponse<Void> apiResponse = ApiResponse.fail(errorCode.getCode(), errorCode.getMessage());
+        ApiResponse<Void> apiResponse = ApiResponse.fail(
+                String.valueOf(errorCode.getStatus().value()),
+                errorCode.name(),
+                errorCode.getMessage()
+        );
         response.getWriter().write(objectMapper.writeValueAsString(apiResponse));
     }
 }
