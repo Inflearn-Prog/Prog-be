@@ -3,17 +3,22 @@ package com.progbe.global.error;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
+@SuppressWarnings("unused")
 @Getter
 public enum ErrorCode {
 
     // 4XX
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "로그인이 필요한 기능입니다."),
     ACCESS_DENIED(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
-    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "User Not Found"),
-    INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "Invalid Input Value"),
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 사용자입니다."),
+    INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "유효하지 않은 입력값입니다."),
+
+    INVALID_PROVIDER(HttpStatus.BAD_REQUEST, "유효하지 않은 소셜 프로바이더입니다."),
+    SOCIAL_LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "소셜 로그인에 실패했습니다."),
+    INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
 
     // 5XX
-    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error");
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내 오류입니다.");
 
 
     private final HttpStatus status;
