@@ -1,7 +1,7 @@
 package com.progbe.domain.user.mapper;
 
 import com.progbe.domain.user.entity.UserEntity;
-import com.progbe.domain.user.entity.UserSocialLink;
+import com.progbe.domain.user.entity.UserSocialLinkEntity;
 import com.progbe.domain.user.type.Role;
 import com.progbe.domain.user.type.UserStatus;
 import com.progbe.global.oauth.OAuth2Attributes;
@@ -24,8 +24,8 @@ public class UserMapper {
                 .build();
     }
 
-    public UserSocialLink toUserSocialLink(UserEntity user, String provider, String providerUserId) {
-        return UserSocialLink.builder()
+    public UserSocialLinkEntity toUserSocialLink(UserEntity user, String provider, String providerUserId) {
+        return UserSocialLinkEntity.builder()
                 .userEntity(user)
                 .provider(provider)
                 .providerUserId(providerUserId)

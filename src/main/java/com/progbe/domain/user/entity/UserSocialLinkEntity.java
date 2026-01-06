@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 )
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class UserSocialLink {
+public class UserSocialLinkEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,7 +36,7 @@ public class UserSocialLink {
     private String providerUserId;
 
     @Builder
-    public UserSocialLink(UserEntity userEntity, String provider, String providerUserId) {
+    public UserSocialLinkEntity(UserEntity userEntity, String provider, String providerUserId) {
         this.userEntity = userEntity;
         this.provider = provider;
         this.providerUserId = providerUserId;

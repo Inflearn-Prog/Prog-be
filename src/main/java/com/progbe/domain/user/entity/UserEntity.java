@@ -59,7 +59,7 @@ public class UserEntity {
     private LocalDateTime inactivatedAt;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserSocialLink> socialLinks = new ArrayList<>();
+    private List<UserSocialLinkEntity> socialLinks = new ArrayList<>();
 
     @Builder
     public UserEntity(String nickname, String email, String profileUrl, Role role, UserStatus status) {

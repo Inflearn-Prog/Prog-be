@@ -2,7 +2,7 @@ package com.progbe.domain.user.service;
 
 import com.progbe.domain.user.dto.UserLoginResult;
 import com.progbe.domain.user.entity.UserEntity;
-import com.progbe.domain.user.entity.UserSocialLink;
+import com.progbe.domain.user.entity.UserSocialLinkEntity;
 import com.progbe.domain.user.mapper.UserMapper;
 import com.progbe.domain.user.repository.UserRepository;
 import com.progbe.global.oauth.OAuth2Attributes;
@@ -38,7 +38,7 @@ public class UserService {
 
     private UserLoginResult registerUser(String provider, OAuth2Attributes attributes) {
         UserEntity newUser = userMapper.toUserEntity(attributes);
-        UserSocialLink socialLink = userMapper.toUserSocialLink(newUser, provider, attributes.providerId());
+        UserSocialLinkEntity socialLink = userMapper.toUserSocialLink(newUser, provider, attributes.providerId());
 
         newUser.getSocialLinks().add(socialLink);
 
