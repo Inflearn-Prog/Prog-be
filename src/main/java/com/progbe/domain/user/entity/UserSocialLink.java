@@ -6,17 +6,24 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.UUID;
-
 @Entity
-@Table(name = "user_social_links")
+@Table(
+        name = "user_social_links",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_social_link_provider_id",
+                        columnNames = {"provider", "provider_user_id"}
+                )
+        }
+)
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserSocialLink {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "social_link_id")
-    private String id;
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -30,7 +37,6 @@ public class UserSocialLink {
 
     @Builder
     public UserSocialLink(UserEntity userEntity, String provider, String providerUserId) {
-        this.id = UUID.randomUUID().toString();
         this.userEntity = userEntity;
         this.provider = provider;
         this.providerUserId = providerUserId;

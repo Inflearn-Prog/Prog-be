@@ -5,22 +5,27 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.progbe.domain.auth.dto.SocialLoginRequest;
 import com.progbe.domain.auth.dto.SocialLoginResponse;
+import com.progbe.domain.auth.dto.TokenResponse;
+import com.progbe.domain.auth.mapper.AuthMapper;
 import com.progbe.domain.user.dto.UserLoginResult;
 import com.progbe.domain.user.entity.UserEntity;
+import com.progbe.domain.user.repository.UserRepository;
 import com.progbe.domain.user.service.UserService;
 import com.progbe.global.error.ErrorCode;
 import com.progbe.global.error.exception.CustomException;
 import com.progbe.global.jwt.JwtTokenProvider;
 import com.progbe.global.oauth.OAuth2Attributes;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
@@ -35,13 +40,13 @@ import java.util.Map;
 public class AuthService {
 
     private final UserService userService;
+    private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
+    private final AuthMapper authMapper;
     private final RestClient restClient = RestClient.create();
     private final ObjectMapper objectMapper;
 
-    // =========================================================================
     // KAKAO Configuration
-    // =========================================================================
     @Value("${spring.security.oauth2.client.registration.kakao.client-id}")
     private String kakaoClientId;
 
@@ -57,16 +62,13 @@ public class AuthService {
     @Value("${spring.security.oauth2.client.provider.kakao.user-info-uri}")
     private String kakaoUserInfoUri;
 
-    // =========================================================================
     // NAVER Configuration
-    // =========================================================================
     @Value("${spring.security.oauth2.client.registration.naver.client-id}")
     private String naverClientId;
 
     @Value("${spring.security.oauth2.client.registration.naver.client-secret}")
     private String naverClientSecret;
 
-    // 네이버는 state 값이 필수 (임시로 고정값 사용)
     private static final String NAVER_STATE = "STATE_STRING";
 
     @Value("${spring.security.oauth2.client.provider.naver.token-uri}")
@@ -74,7 +76,6 @@ public class AuthService {
 
     @Value("${spring.security.oauth2.client.provider.naver.user-info-uri}")
     private String naverUserInfoUri;
-
 
     @Transactional
     public SocialLoginResponse socialLogin(SocialLoginRequest request) {
@@ -88,18 +89,41 @@ public class AuthService {
         UserEntity userEntity = loginResult.user();
         boolean isNewUser = loginResult.isNewUser();
 
-        UserDetails principal = new org.springframework.security.core.userdetails.User(userEntity.getId().toString(), "",
+        UserDetails principal = new User(userEntity.getId().toString(), "",
                 Collections.singleton(new SimpleGrantedAuthority("ROLE_" + userEntity.getRole().name())));
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(principal, "", principal.getAuthorities());
 
         String accessToken = jwtTokenProvider.createAccessToken(authentication);
         String refreshToken = jwtTokenProvider.createRefreshToken(authentication);
 
-        return SocialLoginResponse.builder()
-                .isNewUser(isNewUser)
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .build();
+        return authMapper.toSocialLoginResponse(isNewUser, accessToken, refreshToken);
+    }
+
+
+    public TokenResponse refresh(String oldRefreshToken) {
+        if (oldRefreshToken == null || !jwtTokenProvider.validateToken(oldRefreshToken)) {
+            throw new CustomException(ErrorCode.INVALID_TOKEN);
+        }
+
+        String userId = jwtTokenProvider.getSubject(oldRefreshToken);
+        UserEntity user = userRepository.findById(Long.valueOf(userId))
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        Authentication authentication = createAuthentication(user);
+
+        String newAccessToken = jwtTokenProvider.createAccessToken(authentication);
+        String newRefreshToken = jwtTokenProvider.createRefreshToken(authentication);
+
+        return authMapper.toTokenResponse(newAccessToken, newRefreshToken);
+    }
+
+    private Authentication createAuthentication(UserEntity user) {
+        UserDetails principal = new org.springframework.security.core.userdetails.User(
+                user.getId().toString(),
+                "",
+                Collections.singleton(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
+        );
+        return new UsernamePasswordAuthenticationToken(principal, "", principal.getAuthorities());
     }
 
     private String getSocialAccessToken(String provider, String authCode) {
@@ -113,7 +137,7 @@ public class AuthService {
             case "KAKAO" -> {
                 body.add("client_id", kakaoClientId);
                 body.add("client_secret", kakaoClientSecret);
-                body.add("redirect_uri", kakaoRedirectUri); // Config 값 사용
+                body.add("redirect_uri", kakaoRedirectUri);
                 tokenUri = kakaoTokenUri;
             }
             case "NAVER" -> {
@@ -125,7 +149,6 @@ public class AuthService {
             default -> throw new CustomException(ErrorCode.INVALID_PROVIDER);
         }
 
-        // 3. API 요청 보내기
         String response = restClient.post()
                 .uri(tokenUri)
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -133,37 +156,35 @@ public class AuthService {
                 .retrieve()
                 .body(String.class);
 
-        // 4. 응답 파싱
         try {
             JsonNode jsonNode = objectMapper.readTree(response);
             return jsonNode.get("access_token").asText();
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("소셜 토큰 파싱 실패", e);
+            throw new CustomException(ErrorCode.SOCIAL_LOGIN_FAILED);
         }
     }
 
     private OAuth2Attributes getSocialUserInfo(String provider, String accessToken) {
         String userInfoUri;
-        String providerId; // registrationId (kakao, naver)
+        String providerId;
 
         if ("KAKAO".equals(provider)) {
-            userInfoUri = "https://kapi.kakao.com/v2/user/me";
+            userInfoUri = kakaoUserInfoUri;
             providerId = "kakao";
         } else if ("NAVER".equals(provider)) {
-            userInfoUri = "https://openapi.naver.com/v1/nid/me";
+            userInfoUri = naverUserInfoUri;
             providerId = "naver";
         } else {
-            throw new IllegalArgumentException("지원하지 않는 프로바이더입니다.");
+            throw new CustomException(ErrorCode.INVALID_PROVIDER);
         }
 
+        @SuppressWarnings("unchecked")
         Map<String, Object> attributes = restClient.get()
                 .uri(userInfoUri)
                 .header("Authorization", "Bearer " + accessToken)
                 .retrieve()
                 .body(Map.class);
 
-        // 기존 OAuth2Attributes 재사용
         return OAuth2Attributes.of(providerId, attributes);
     }
-
 }
