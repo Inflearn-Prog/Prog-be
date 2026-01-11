@@ -1,5 +1,6 @@
 package com.progbe.domain.user.entity;
 
+import com.progbe.domain.terms.entity.UserTermsAgreementEntity;
 import com.progbe.domain.user.type.Role;
 import com.progbe.domain.user.type.UserStatus;
 import jakarta.persistence.*;
@@ -60,6 +61,9 @@ public class UserEntity {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserSocialLinkEntity> socialLinks = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserTermsAgreementEntity> termsAgreements = new ArrayList<>();
 
     @Builder
     public UserEntity(String nickname, String email, String profileUrl, Role role, UserStatus status) {
