@@ -2,6 +2,7 @@ package com.progbe.domain.terms.service;
 
 import com.progbe.domain.terms.dto.TermsAgreementRequest;
 import com.progbe.domain.terms.dto.TermsAgreementResponse;
+import com.progbe.domain.terms.dto.TermsListResponse;
 import com.progbe.domain.terms.dto.TermsResponseDto;
 import com.progbe.domain.terms.entity.TermsEntity;
 import com.progbe.domain.terms.entity.UserTermsAgreementEntity;
@@ -32,10 +33,12 @@ public class TermsService {
     private final UserTermsAgreementRepository userTermsAgreementRepository;
     private final TermsMapper termsMapper;
 
-    public List<TermsResponseDto> getAllTerms() {
-        return termsRepository.findAllByOrderByRequiredDescIdAsc().stream()
+    public TermsListResponse getAllTerms() {
+        List<TermsResponseDto> terms = termsRepository.findAllByOrderByRequiredDescIdAsc().stream()
                 .map(termsMapper::toTermsResponseDto)
                 .collect(Collectors.toList());
+
+        return new TermsListResponse(terms);
     }
 
     @Transactional
