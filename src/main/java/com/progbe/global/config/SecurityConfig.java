@@ -31,7 +31,8 @@ public class SecurityConfig {
             "/api/auth/social-login",
             "/api/auth/refresh",
             "/api/app/**",
-            "/h2-console/**"
+            "/h2-console/**",
+            "/terms"
     };
 
     @Bean

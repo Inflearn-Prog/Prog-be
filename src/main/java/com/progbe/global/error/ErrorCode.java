@@ -18,6 +18,8 @@ public enum ErrorCode {
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
 
     // 5XX
+    TRANSACTION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "일시적인 오류로 작업에 실패했습니다."),
+    SERVICE_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "현재 트래픽 폭주로 인해 요청을 처리할 수 없습니다."),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내 오류입니다.");
 
 
