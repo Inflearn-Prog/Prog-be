@@ -1,6 +1,8 @@
 package com.progbe.domain.user.mapper;
 
+import com.progbe.domain.user.dto.OnboardingResponse;
 import com.progbe.domain.user.entity.UserEntity;
+import com.progbe.domain.user.entity.UserProfileEntity;
 import com.progbe.domain.user.entity.UserSocialLinkEntity;
 import com.progbe.domain.user.type.Role;
 import com.progbe.domain.user.type.UserStatus;
@@ -29,6 +31,20 @@ public class UserMapper {
                 .userEntity(user)
                 .provider(provider)
                 .providerUserId(providerUserId)
+                .build();
+    }
+
+    public OnboardingResponse toOnboardingResponse(Long userId, String message, String nextStep) {
+        return OnboardingResponse.builder()
+                .userId(userId)
+                .message(message)
+                .nextStep(nextStep)
+                .build();
+    }
+
+    public UserProfileEntity toUserProfileEntity(UserEntity user) {
+        return UserProfileEntity.builder()
+                .user(user)
                 .build();
     }
 }

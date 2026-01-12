@@ -38,6 +38,7 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     implementation("org.springframework.boot:spring-boot-starter-security")
     testImplementation("org.springframework.security:spring-security-test")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
 
     // JJwt
     implementation("io.jsonwebtoken:jjwt-api:0.12.6")
