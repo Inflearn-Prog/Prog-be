@@ -1,7 +1,9 @@
 package com.progbe.domain.user.mapper;
 
+import com.progbe.domain.user.dto.OnboardingResponse;
 import com.progbe.domain.user.dto.UserWithdrawalResponse;
 import com.progbe.domain.user.entity.UserEntity;
+import com.progbe.domain.user.entity.UserProfileEntity;
 import com.progbe.domain.user.entity.UserSocialLinkEntity;
 import com.progbe.domain.user.entity.UserWithdrawalHistoryEntity;
 import com.progbe.domain.user.type.Role;
@@ -48,5 +50,19 @@ public class UserMapper {
                 unlinkedProviders,
                 user.getDeletedAt()
         );
+    }
+
+    public OnboardingResponse toOnboardingResponse(Long userId, String message, String nextStep) {
+        return OnboardingResponse.builder()
+                .userId(userId)
+                .message(message)
+                .nextStep(nextStep)
+                .build();
+    }
+
+    public UserProfileEntity toUserProfileEntity(UserEntity user) {
+        return UserProfileEntity.builder()
+                .user(user)
+                .build();
     }
 }
