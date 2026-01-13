@@ -1,5 +1,6 @@
 package com.progbe.domain.user.service;
 
+import com.progbe.domain.auth.client.SocialApiClient;
 import com.progbe.domain.user.dto.UserLoginResult;
 import com.progbe.domain.user.dto.UserWithdrawalRequest;
 import com.progbe.domain.user.dto.UserWithdrawalResponse;
@@ -23,6 +24,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final UserWithdrawalHistoryRepository userWithdrawalHistoryRepository;
+    private final SocialApiClient socialApiClient;
 
     /**
      * 소셜 로그인 사용자를 등록하거나 기존 사용자 정보를 업데이트합니다.
@@ -77,6 +79,21 @@ public class UserService {
                     userMapper.toWithdrawalHistory(user.getId(), request.reason())
             );
         }
+
+        user.getSocialLinks().forEach(link -> {
+            try {
+                String refreshToken = link.getSocialRefreshToken();
+                if (refreshToken != null) {
+                    String accessToken = socialApiClient.refreshAccessToken(link.getProvider(), refreshToken);
+
+                    if (accessToken != null) {
+                        socialApiClient.unlink(link.getProvider(), accessToken);
+                    }
+                }
+            } catch (Exception e) {
+                throw new CustomException(ErrorCode.SOCIAL_UNLINK_FAILED);
+            }
+        });
 
         String providers = user.getSocialLinks().stream()
                 .map(UserSocialLinkEntity::getProvider)
