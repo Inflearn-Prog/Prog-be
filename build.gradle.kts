@@ -39,6 +39,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
     testImplementation("org.springframework.security:spring-security-test")
 
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.12")
+    implementation("org.apache.commons:commons-lang3:3.18.0")
     // JJwt
     implementation("io.jsonwebtoken:jjwt-api:0.12.6")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
