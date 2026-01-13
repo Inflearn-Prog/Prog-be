@@ -3,14 +3,14 @@ package com.progbe.domain.user.controller;
 import com.progbe.domain.terms.dto.TermsAgreementRequest;
 import com.progbe.domain.terms.dto.TermsAgreementResponse;
 import com.progbe.domain.terms.service.TermsService;
+import com.progbe.domain.user.dto.UserWithdrawalRequest;
+import com.progbe.domain.user.dto.UserWithdrawalResponse;
+import com.progbe.domain.user.service.UserService;
 import com.progbe.global.common.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/users")
@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
     private final TermsService termsService;
+    private final UserService userService;
 
     @PostMapping("/terms-agreement")
     public ApiResponse<TermsAgreementResponse> agreeTerms(
@@ -25,9 +26,21 @@ public class UserController {
             @AuthenticationPrincipal UserDetails userDetails
     ) {
         Long userId = Long.parseLong(userDetails.getUsername());
-        
+
         TermsAgreementResponse response = termsService.processAgreement(userId, request);
 
+        return ApiResponse.success(response);
+    }
+
+    @DeleteMapping("/me")
+    public ApiResponse<UserWithdrawalResponse> withdraw(
+            @PathVariable String uid,
+            @RequestBody(required = false) UserWithdrawalRequest request,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        Long userId = Long.parseLong(userDetails.getUsername());
+
+      UserWithdrawalResponse response = userService.withdrawUser(userId, request);
         return ApiResponse.success(response);
     }
 }

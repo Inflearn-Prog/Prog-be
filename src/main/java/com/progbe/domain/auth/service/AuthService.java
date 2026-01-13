@@ -7,6 +7,7 @@ import com.progbe.domain.auth.dto.SocialLoginRequest;
 import com.progbe.domain.auth.dto.SocialLoginResponse;
 import com.progbe.domain.auth.dto.TokenResponse;
 import com.progbe.domain.auth.mapper.AuthMapper;
+import com.progbe.domain.user.dto.SocialTokens;
 import com.progbe.domain.user.dto.UserLoginResult;
 import com.progbe.domain.user.entity.UserEntity;
 import com.progbe.domain.user.repository.UserRepository;
@@ -80,12 +81,16 @@ public class AuthService {
     @Transactional
     public SocialLoginResponse socialLogin(SocialLoginRequest request) {
         String provider = request.provider().toUpperCase();
+        SocialTokens socialTokens = getSocialTokens(provider, request.authCode());
 
-        String socialAccessToken = getSocialAccessToken(provider, request.authCode());
+        OAuth2Attributes oAuth2Attributes = getSocialUserInfo(provider, socialTokens.accessToken());
 
-        OAuth2Attributes oAuth2Attributes = getSocialUserInfo(provider, socialAccessToken);
+        UserLoginResult loginResult = userService.registerOrUpdateUser(
+                provider,
+                oAuth2Attributes,
+                socialTokens.refreshToken()
+        );
 
-        UserLoginResult loginResult = userService.registerOrUpdateUser(provider, oAuth2Attributes);
         UserEntity userEntity = loginResult.user();
         boolean isNewUser = loginResult.isNewUser();
 
@@ -126,7 +131,7 @@ public class AuthService {
         return new UsernamePasswordAuthenticationToken(principal, "", principal.getAuthorities());
     }
 
-    private String getSocialAccessToken(String provider, String authCode) {
+    private SocialTokens getSocialTokens(String provider, String authCode) {
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("grant_type", "authorization_code");
         body.add("code", authCode);
@@ -158,7 +163,10 @@ public class AuthService {
 
         try {
             JsonNode jsonNode = objectMapper.readTree(response);
-            return jsonNode.get("access_token").asText();
+            String accessToken = jsonNode.get("access_token").asText();
+            String refreshToken = jsonNode.has("refresh_token") ? jsonNode.get("refresh_token").asText() : null;
+
+            return new SocialTokens(accessToken, refreshToken);
         } catch (JsonProcessingException e) {
             throw new CustomException(ErrorCode.SOCIAL_LOGIN_FAILED);
         }

@@ -35,10 +35,18 @@ public class UserSocialLinkEntity {
     @Column(name = "provider_user_id", nullable = false)
     private String providerUserId;
 
+    @Column(name = "social_refresh_token", columnDefinition = "TEXT")
+    private String socialRefreshToken;
+
+    public void updateSocialRefreshToken(String socialRefreshToken) {
+        this.socialRefreshToken = socialRefreshToken;
+    }
+
     @Builder
-    public UserSocialLinkEntity(UserEntity userEntity, String provider, String providerUserId) {
+    public UserSocialLinkEntity(UserEntity userEntity, String provider, String providerUserId, String socialRefreshToken) {
         this.userEntity = userEntity;
         this.provider = provider;
         this.providerUserId = providerUserId;
+        this.socialRefreshToken = socialRefreshToken;
     }
 }

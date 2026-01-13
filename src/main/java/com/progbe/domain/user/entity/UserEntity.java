@@ -78,4 +78,9 @@ public class UserEntity {
         if (nickname != null) this.nickname = nickname;
         if (profileUrl != null) this.profileUrl = profileUrl;
     }
+
+    public void delete() {
+        this.status = UserStatus.DELETED;
+        this.deletedAt = LocalDateTime.now();
+    }
 }
