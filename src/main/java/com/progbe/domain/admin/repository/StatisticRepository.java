@@ -24,4 +24,15 @@ public interface StatisticRepository extends JpaRepository<StatisticEntity, Long
             @Param("today") LocalDateTime today
     );
 
+    @Query("""
+    SELECT COALESCE(SUM(s.count), 0)
+    FROM StatisticEntity s
+    WHERE s.type = :type
+      AND s.createdAt = :createdAt
+""")
+    long findTotalByTypeAndCreatedAt(
+            @Param("type") StatisticType type,
+            @Param("createdAt") LocalDateTime createdAt
+    );
+
 }
