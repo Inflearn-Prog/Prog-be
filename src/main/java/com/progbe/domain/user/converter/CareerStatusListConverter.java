@@ -3,6 +3,8 @@ package com.progbe.domain.user.converter;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.progbe.domain.user.type.CareerStatus;
+import com.progbe.global.error.ErrorCode;
+import com.progbe.global.error.exception.CustomException;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
@@ -22,7 +24,7 @@ public class CareerStatusListConverter implements AttributeConverter<List<Career
         try {
             return mapper.writeValueAsString(attribute);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to convert CareerStatus list to JSON", e);
+            throw new CustomException(ErrorCode.DATA_CONVERSION_ERROR);
         }
     }
 
@@ -34,7 +36,7 @@ public class CareerStatusListConverter implements AttributeConverter<List<Career
         try {
             return mapper.readValue(dbData, new TypeReference<List<CareerStatus>>() {});
         } catch (Exception e) {
-            throw new RuntimeException("Failed to convert JSON to CareerStatus list", e);
+            throw new CustomException(ErrorCode.DATA_CONVERSION_ERROR);
         }
     }
 }
