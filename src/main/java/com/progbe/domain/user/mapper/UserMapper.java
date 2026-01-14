@@ -1,7 +1,9 @@
 package com.progbe.domain.user.mapper;
 
+import com.progbe.domain.user.dto.UserWithdrawalResponse;
 import com.progbe.domain.user.entity.UserEntity;
 import com.progbe.domain.user.entity.UserSocialLinkEntity;
+import com.progbe.domain.user.entity.UserWithdrawalHistoryEntity;
 import com.progbe.domain.user.type.Role;
 import com.progbe.domain.user.type.UserStatus;
 import com.progbe.global.oauth.OAuth2Attributes;
@@ -24,11 +26,27 @@ public class UserMapper {
                 .build();
     }
 
-    public UserSocialLinkEntity toUserSocialLink(UserEntity user, String provider, String providerUserId) {
+    public UserSocialLinkEntity toUserSocialLink(UserEntity user, String provider, String providerUserId, String socialRefreshToken) {
         return UserSocialLinkEntity.builder()
                 .userEntity(user)
                 .provider(provider)
                 .providerUserId(providerUserId)
+                .socialRefreshToken(socialRefreshToken)
                 .build();
+    }
+
+    public UserWithdrawalHistoryEntity toWithdrawalHistory(Long userId, String reason) {
+        return UserWithdrawalHistoryEntity.builder()
+                .userId(userId)
+                .reason(reason)
+                .build();
+    }
+
+    public UserWithdrawalResponse toWithdrawalResponse(UserEntity user, String unlinkedProviders) {
+        return new UserWithdrawalResponse(
+                user.getNickname(),
+                unlinkedProviders,
+                user.getDeletedAt()
+        );
     }
 }
