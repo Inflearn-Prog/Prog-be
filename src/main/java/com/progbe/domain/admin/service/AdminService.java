@@ -2,9 +2,12 @@ package com.progbe.domain.admin.service;
 
 import com.progbe.domain.admin.component.StatisticComponent;
 import com.progbe.domain.admin.dto.AdminResponse;
+import com.progbe.domain.admin.entity.ReportEntity;
+import com.progbe.domain.admin.entity.ReportStatus;
 import com.progbe.domain.admin.entity.StatisticEntity;
 import com.progbe.domain.admin.entity.StatisticType;
 import com.progbe.domain.admin.mapper.AdminMapper;
+import com.progbe.domain.admin.repository.ReportRepository;
 import com.progbe.domain.admin.repository.StatisticRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +24,7 @@ public class AdminService
 {
 
     private final StatisticRepository statisticRepository;
+    private final ReportRepository reportRepository;
     private final StatisticComponent statisticComponent;
     private final List<StatisticType> statisticTypeList;
     private final AdminMapper adminMapper;
@@ -71,6 +75,12 @@ public class AdminService
         return adminMapper.toDailyStatisticSummaryResponse(rateMap,todayCountMap);
 
     }
+
+    public AdminResponse.PendingReportListResponse getPendingReportList() {
+        return adminMapper.toPendingReportListResponse(reportRepository.findByStatus(ReportStatus.PENDING));
+    }
+
+
 
     private long getCount(StatisticType type, LocalDateTime date) {
         return Optional.of(

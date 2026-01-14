@@ -22,4 +22,21 @@ public class AdminResponse {
         private double changeRate;
         private String type;
     }
+
+    @Getter
+    @AllArgsConstructor
+    @Builder
+    public static class PendingReportListResponse {
+       List<PendingReportResponse> pendingReports;
+       int totalCount;
+    }
+
+    @Getter
+    @AllArgsConstructor
+    @Builder
+    public static class PendingReportResponse {
+        private String nickName;
+        private String content;
+        private String timeAgo;
+    }
 }
