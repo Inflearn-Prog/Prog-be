@@ -11,7 +11,7 @@ import java.util.Map;
 
 @Component
 public class AdminMapper {
-    public AdminResponse.DailyStatisticSummaryResponse ToDailyStatisticSummaryResponse(
+    public AdminResponse.DailyStatisticSummaryResponse toDailyStatisticSummaryResponse(
             Map<StatisticType, Double> rateMap,
             Map<StatisticType, Long> todayCountMap
     ) {

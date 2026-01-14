@@ -17,11 +17,13 @@ public interface StatisticRepository extends JpaRepository<StatisticEntity, Long
     UPDATE StatisticEntity s
     SET s.count = s.count + 1
     WHERE s.type = :type
-      AND s.createdAt = :today
+      AND s.createdAt >= :startOfDay
+      AND s.createdAt < :endOfDay
 """)
     int increaseTodayCount(
             @Param("type") StatisticType type,
-            @Param("today") LocalDateTime today
+            @Param("startOfDay") LocalDateTime startOfDay,
+            @Param("endOfDay") LocalDateTime endOfDay
     );
 
     @Query("""

@@ -28,13 +28,18 @@ public class AdminService
     @Transactional
     public void increaseToday(StatisticType type) {
 
-        LocalDateTime today = LocalDate.now().atStartOfDay();
+        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+        LocalDateTime endOfDay = startOfDay.plusDays(1);
 
-        int updated = statisticRepository.increaseTodayCount(type, today);
+        int updated = statisticRepository.increaseTodayCount(
+                type,
+                startOfDay,
+                endOfDay
+        );
 
         if (updated == 0) {
             // 오늘 row가 없으면 생성
-            StatisticEntity statistic = StatisticEntity.builder().count(1).build();
+            StatisticEntity statistic = StatisticEntity.builder().type(type).count(1).build();
             statisticRepository.save(statistic);
         }
     }
@@ -44,6 +49,8 @@ public class AdminService
 
 
 
+
+    @Transactional(readOnly = true)
     public AdminResponse.DailyStatisticSummaryResponse getDailyStatisticSummary() {
 
         LocalDateTime today = LocalDate.now().atStartOfDay();
@@ -61,7 +68,7 @@ public class AdminService
             rateMap.put(type, rate);
             todayCountMap.put(type,todayCount);
         }
-        return adminMapper.ToDailyStatisticSummaryResponse(rateMap,todayCountMap);
+        return adminMapper.toDailyStatisticSummaryResponse(rateMap,todayCountMap);
 
     }
 
