@@ -38,6 +38,7 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     implementation("org.springframework.boot:spring-boot-starter-security")
     testImplementation("org.springframework.security:spring-security-test")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
 
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.12")
     implementation("org.apache.commons:commons-lang3:3.18.0")
