@@ -54,7 +54,7 @@ public class UserController {
         return ApiResponse.success(response);
     }
 
-    @PutMapping("me/onboarding/basic")
+    @PutMapping("/me/onboarding/basic")
     public ApiResponse<OnboardingResponse> updateBasicInfo(
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestBody OnboardingBasicRequest request

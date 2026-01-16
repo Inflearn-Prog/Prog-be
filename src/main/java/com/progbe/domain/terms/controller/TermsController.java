@@ -16,7 +16,7 @@ public class TermsController {
 
     private final TermsService termsService;
 
-    @GetMapping
+    @GetMapping("/")
     public ResponseEntity<ApiResponse<TermsListResponse>> getTerms() {
         TermsListResponse response = termsService.getAllTerms();
         return ResponseEntity.ok(ApiResponse.success(response));
