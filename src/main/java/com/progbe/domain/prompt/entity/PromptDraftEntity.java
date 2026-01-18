@@ -13,14 +13,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(
-        name = "prompt_drafts",
-        indexes = {
-                @Index(name = "idx_prompt_drafts_user_id", columnList = "user_id"),
-                @Index(name = "idx_prompt_drafts_category_id", columnList = "category_id"),
-                @Index(name = "idx_prompt_drafts_updated_at", columnList = "updated_at")
-        }
-)
+@Table(name = "prompt_drafts")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
