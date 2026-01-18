@@ -2,7 +2,6 @@ package com.progbe.domain.admin.entity;
 
 import com.progbe.global.common.BaseEntity;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,21 +14,19 @@ import static lombok.AccessLevel.PROTECTED;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = PROTECTED)
-public class StatisticEntity extends BaseEntity
-{
-
+public class ReportEntity extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private long count;
+    @Column(nullable = false)
+    private String nickName;
 
-    @NotNull
+    //글자수 관련 기획이 없어서 일단은 임의로 1000설정
+    @Column(nullable = false, length = 1000)
+    private String content;
+
     @Enumerated(EnumType.STRING)
-    private StatisticType type;
-
-
-    public void increaseCount() {
-        count++;
-    }
+    @Column(nullable = false)
+    private ReportStatus status;
 }
