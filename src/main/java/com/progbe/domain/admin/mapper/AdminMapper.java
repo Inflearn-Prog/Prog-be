@@ -3,13 +3,15 @@ package com.progbe.domain.admin.mapper;
 import com.progbe.domain.admin.dto.AdminResponse;
 import com.progbe.domain.admin.entity.ReportEntity;
 import com.progbe.domain.admin.entity.StatisticType;
+import com.progbe.domain.user.entity.UserEntity;
+import com.progbe.global.common.CommonMapper;
+import com.progbe.global.common.CommonResponse;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
-
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 
 
 @Component
@@ -42,7 +44,7 @@ public class AdminMapper {
                 .map(report -> AdminResponse.PendingReportResponse.builder()
                         .nickName(report.getNickName())
                         .content(report.getContent())
-                        .timeAgo(toRelativeTime(report.getCreatedAt()))
+                        .timeAgo(CommonMapper.toRelativeTime(report.getCreatedAt()))
                         .build()
                 )
                 .toList();
@@ -52,11 +54,25 @@ public class AdminMapper {
                 .totalCount(reports.size())
                 .build();
     }
+    public AdminResponse.UserSearchResult toUserSearchResult(Page<UserEntity> page)
+    {
 
-    private static String toRelativeTime(LocalDateTime time) {
-        Duration duration = Duration.between(time, LocalDateTime.now());
+        List<AdminResponse.UserSearch> userSearchList = page.stream()
+                .map(user -> AdminResponse.UserSearch.builder()
+                        .nickName(user.getNickname())
+                        .email(user.getEmail())
+                        .status(user.getStatus().name())
+                        .lastActive(CommonMapper.toRelativeTime(user.getInactivatedAt()))
+                        .registered(CommonMapper.toDate(user.getCreatedAt()))
+                        .build()
+                )
+                .toList();
 
-        if (duration.toHours() < 24) return duration.toHours() + "hrs ago";
-        return duration.toDays() + "day ago";
+        return AdminResponse.UserSearchResult.builder()
+                .userSearchList(userSearchList)
+                .pageInfoResponse(CommonMapper.toPageInfoResponse(page))
+                .build();
     }
+
 }
+

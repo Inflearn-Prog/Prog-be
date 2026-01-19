@@ -1,5 +1,6 @@
 package com.progbe.domain.admin.dto;
 
+import com.progbe.global.common.CommonResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -38,5 +39,27 @@ public class AdminResponse {
         private String nickName;
         private String content;
         private String timeAgo;
+    }
+
+    @Getter
+    @AllArgsConstructor
+    @Builder
+    public static  class UserSearchResult
+    {
+        List<UserSearch> userSearchList;
+        CommonResponse.PageInfoResponse pageInfoResponse;
+    }
+
+    @Getter
+    @AllArgsConstructor
+    @Builder
+    public static  class UserSearch
+    {
+        String nickName;
+        String email;
+        String status;
+        String lastActive;
+        String registered;
+        //액션스??
     }
 }

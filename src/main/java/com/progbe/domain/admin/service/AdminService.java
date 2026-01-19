@@ -9,8 +9,15 @@ import com.progbe.domain.admin.entity.StatisticType;
 import com.progbe.domain.admin.mapper.AdminMapper;
 import com.progbe.domain.admin.repository.ReportRepository;
 import com.progbe.domain.admin.repository.StatisticRepository;
+import com.progbe.domain.user.entity.UserEntity;
+import com.progbe.domain.user.repository.UserRepository;
+import com.progbe.global.common.CommonMapper;
+import com.progbe.global.common.CommonResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +32,7 @@ public class AdminService
 
     private final StatisticRepository statisticRepository;
     private final ReportRepository reportRepository;
+    private final UserRepository userRepository;
     private final StatisticComponent statisticComponent;
     private final List<StatisticType> statisticTypeList;
     private final AdminMapper adminMapper;
@@ -88,4 +96,9 @@ public class AdminService
         ).orElse(0L);
     }
 
+    public AdminResponse.UserSearchResult searchUsers(String keyword,int page)
+    {
+        Pageable pageable = PageRequest.of(page,5);
+        return adminMapper.toUserSearchResult(userRepository.findByEmailContainingOrNicknameContaining(keyword,keyword,pageable));
+    }
 }
