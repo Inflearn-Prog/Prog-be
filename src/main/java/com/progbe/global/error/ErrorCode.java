@@ -11,6 +11,8 @@ public enum ErrorCode {
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "로그인이 필요한 기능입니다."),
     ACCESS_DENIED(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 사용자입니다."),
+    PROMPT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 프롬프트입니다."),
+    CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 카테고리입니다."),
     INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "유효하지 않은 입력값입니다."),
 
     INVALID_PROVIDER(HttpStatus.BAD_REQUEST, "유효하지 않은 소셜 프로바이더입니다."),
