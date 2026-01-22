@@ -1,5 +1,6 @@
 package com.progbe.domain.prompt.entity;
 
+import com.progbe.domain.user.entity.UserEntity;
 import com.progbe.global.common.BaseEntity;
 import jakarta.persistence.*;
 
@@ -9,19 +10,26 @@ public class PromptCommentEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "comment_id")
     private Long id;
 
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private UserEntity user;
 
-    private Long promptId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "prompt_id", nullable = false)
+    private PromptEntity prompt;
 
+    @Column(name = "comment", nullable = false)
     private String comment;
 
-    public PromptCommentEntity() {}
+    public PromptCommentEntity() {
+    }
 
-    public PromptCommentEntity(Long userId, Long promptId, String comment) {
-        this.userId = userId;
-        this.promptId = promptId;
+    public PromptCommentEntity(UserEntity user, PromptEntity prompt, String comment) {
+        this.user = user;
+        this.prompt = prompt;
         this.comment = comment;
     }
 
@@ -29,12 +37,12 @@ public class PromptCommentEntity extends BaseEntity {
         return id;
     }
 
-    public Long getUserId() {
-        return userId;
+    public UserEntity getUser() {
+        return user;
     }
 
-    public Long getPromptId() {
-        return promptId;
+    public PromptEntity getPrompt() {
+        return prompt;
     }
 
     public String getComment() {
