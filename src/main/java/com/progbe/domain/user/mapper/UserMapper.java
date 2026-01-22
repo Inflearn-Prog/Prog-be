@@ -1,16 +1,17 @@
 package com.progbe.domain.user.mapper;
 
 import com.progbe.domain.user.dto.OnboardingResponse;
+import com.progbe.domain.user.dto.UserProfileResponse;
 import com.progbe.domain.user.dto.UserWithdrawalResponse;
 import com.progbe.domain.user.entity.UserEntity;
 import com.progbe.domain.user.entity.UserProfileEntity;
 import com.progbe.domain.user.entity.UserSocialLinkEntity;
 import com.progbe.domain.user.entity.UserWithdrawalHistoryEntity;
-import com.progbe.domain.user.type.Role;
-import com.progbe.domain.user.type.UserStatus;
+import com.progbe.domain.user.type.*;
 import com.progbe.global.oauth.OAuth2Attributes;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.UUID;
 
 @Component
@@ -64,5 +65,55 @@ public class UserMapper {
         return UserProfileEntity.builder()
                 .user(user)
                 .build();
+    }
+
+    public UserProfileResponse toUserProfileResponse(UserEntity user, UserProfileEntity profile) {
+        // 1. Basic Info
+        String provider = user.getSocialLinks().stream()
+                .findFirst()
+                .map(UserSocialLinkEntity::getProvider)
+                .orElse(null);
+
+        UserProfileResponse.BasicInfo basicInfo = new UserProfileResponse.BasicInfo(
+                user.getNickname(),
+                user.getEmail(),
+                provider,
+                profile != null ? profile.getBio() : null
+        );
+
+        // 2. Career Info
+        CareerStatus currentStatus = (profile != null && profile.getCurrentStatus() != null && !profile.getCurrentStatus().isEmpty())
+                ? profile.getCurrentStatus().get(0) : null;
+
+        JobRole targetJob = (profile != null && profile.getTargetJob() != null && !profile.getTargetJob().isEmpty())
+                ? profile.getTargetJob().get(0) : null;
+
+        String careerYear = "신입"; // TODO : 정책 논의. 0년차? or 신입?
+        if (profile != null && profile.getExperienceYears() != null) {
+            careerYear = profile.getExperienceYears() == 0 ? "신입" : profile.getExperienceYears() + "년차";
+        }
+
+        EducationLevel education = profile != null ? profile.getEducation() : null;
+        String major = profile != null ? profile.getMajor() : null;
+
+        UserProfileResponse.CareerInfo careerInfo = new UserProfileResponse.CareerInfo(
+                currentStatus,
+                targetJob,
+                careerYear,
+                education,
+                major
+        );
+
+        // 3. Self Intro
+        List<String> keywords = profile != null ? profile.getKeywords() : List.of();
+        // TODO : UserExperiencesEntity 추가 후 받아오는 로직 구현
+        List<String> experiences = List.of();
+
+        UserProfileResponse.SelfIntro selfIntro = new UserProfileResponse.SelfIntro(
+                experiences,
+                keywords
+        );
+
+        return new UserProfileResponse(basicInfo, careerInfo, selfIntro);
     }
 }
