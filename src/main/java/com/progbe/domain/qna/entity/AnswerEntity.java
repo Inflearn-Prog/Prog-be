@@ -1,5 +1,6 @@
 package com.progbe.domain.qna.entity;
 
+import com.progbe.domain.user.entity.UserEntity;
 import jakarta.persistence.*;
 
 @Entity
@@ -8,19 +9,25 @@ public class AnswerEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "answer_id")
     private Long id;
 
-    private Long adminId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private UserEntity admin;
 
-    private Long questionId;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "question_id")
+    private QuestionEntity question;
 
+    @Column(name = "content", nullable = false)
     private String content;
 
     public AnswerEntity() {}
 
-    public AnswerEntity(Long adminId, Long questionId, String content) {
-        this.adminId = adminId;
-        this.questionId = questionId;
+    public AnswerEntity(UserEntity admin, QuestionEntity question, String content) {
+        this.admin = admin;
+        this.question = question;
         this.content = content;
     }
 
@@ -28,12 +35,12 @@ public class AnswerEntity {
         return id;
     }
 
-    public Long getAdminId() {
-        return adminId;
+    public UserEntity getAdmin() {
+        return admin;
     }
 
-    public Long getQuestionId() {
-        return questionId;
+    public QuestionEntity getQuestion() {
+        return question;
     }
 
     public String getContent() {
