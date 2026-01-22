@@ -26,8 +26,8 @@ public record UserProfileResponse(
     ) {}
 
     public record CareerInfo(
-            CareerStatus currentStatus,
-            JobRole targetJob,
+            List<CareerStatus> currentStatus,
+            List<JobRole> targetJob,
             String careerYear,
             EducationLevel education,
             String major

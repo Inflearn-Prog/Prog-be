@@ -70,7 +70,7 @@ public class UserMapper {
     public UserProfileResponse toUserProfileResponse(UserEntity user, UserProfileEntity profile) {
         // 1. Basic Info
         String provider = user.getSocialLinks().stream()
-                .findFirst()
+                .findFirst() // TODO : 여러 연동 계정 중 첫 번째를 대표로 표시
                 .map(UserSocialLinkEntity::getProvider)
                 .orElse(null);
 
@@ -82,15 +82,15 @@ public class UserMapper {
         );
 
         // 2. Career Info
-        CareerStatus currentStatus = (profile != null && profile.getCurrentStatus() != null && !profile.getCurrentStatus().isEmpty())
-                ? profile.getCurrentStatus().get(0) : null;
+        List<CareerStatus> currentStatus = (profile != null && profile.getCurrentStatus() != null)
+                ? profile.getCurrentStatus() : List.of();
 
-        JobRole targetJob = (profile != null && profile.getTargetJob() != null && !profile.getTargetJob().isEmpty())
-                ? profile.getTargetJob().get(0) : null;
+        List<JobRole> targetJob = (profile != null && profile.getTargetJob() != null)
+                ? profile.getTargetJob() : List.of();
 
-        String careerYear = "신입"; // TODO : 정책 논의. 0년차? or 신입?
+        String careerYear = "경력 없음";
         if (profile != null && profile.getExperienceYears() != null) {
-            careerYear = profile.getExperienceYears() == 0 ? "신입" : profile.getExperienceYears() + "년차";
+            careerYear = profile.getExperienceYears() == 0 ? "경력 없음" : profile.getExperienceYears() + "년차";
         }
 
         EducationLevel education = profile != null ? profile.getEducation() : null;
@@ -106,8 +106,7 @@ public class UserMapper {
 
         // 3. Self Intro
         List<String> keywords = profile != null ? profile.getKeywords() : List.of();
-        // TODO : UserExperiencesEntity 추가 후 받아오는 로직 구현
-        List<String> experiences = List.of();
+        List<String> experiences = List.of(); //TODO : UserExperiencesEntity 추가 후 받아오는 로직 구현
 
         UserProfileResponse.SelfIntro selfIntro = new UserProfileResponse.SelfIntro(
                 experiences,

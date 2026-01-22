@@ -3,6 +3,7 @@ package com.progbe.domain.user.service;
 import com.progbe.domain.user.dto.OnboardingBasicRequest;
 import com.progbe.domain.user.dto.OnboardingCareerRequest;
 import com.progbe.domain.user.dto.OnboardingResponse;
+import com.progbe.domain.user.dto.UserProfileResponse;
 import com.progbe.domain.user.entity.UserEntity;
 import com.progbe.domain.user.entity.UserProfileEntity;
 import com.progbe.domain.user.mapper.UserMapper;
@@ -52,8 +53,8 @@ public class UserProfileService {
     }
 
     @Transactional(readOnly = true)
-    public com.progbe.domain.user.dto.UserProfileResponse getProfile(Long userId) {
-        UserEntity user = userRepository.findById(userId)
+    public UserProfileResponse getProfile(Long userId) {
+        UserEntity user = userRepository.findByIdWithSocialLinks(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         // 온보딩 과정에서 모든 필드가 입력되지 않은 경우 -> null 처리
