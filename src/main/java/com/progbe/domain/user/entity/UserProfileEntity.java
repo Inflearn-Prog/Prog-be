@@ -11,17 +11,13 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
 @Table(name = "user_profiles")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@EntityListeners(AuditingEntityListener.class)
 public class UserProfileEntity {
 
     @Id
@@ -57,10 +53,6 @@ public class UserProfileEntity {
     @Convert(converter = StringListConverter.class)
     @Column(name = "keywords", columnDefinition = "json")
     private List<String> keywords;
-
-    @LastModifiedDate
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
 
     @Builder
     public UserProfileEntity(UserEntity user, List<CareerStatus> currentStatus, List<JobRole> targetJob, EducationLevel education, Integer experienceYears, String major, String bio, List<String> keywords) {

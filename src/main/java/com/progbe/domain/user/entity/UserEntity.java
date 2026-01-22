@@ -3,14 +3,12 @@ package com.progbe.domain.user.entity;
 import com.progbe.domain.terms.entity.UserTermsAgreementEntity;
 import com.progbe.domain.user.type.Role;
 import com.progbe.domain.user.type.UserStatus;
+import com.progbe.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -20,8 +18,7 @@ import java.util.List;
 @Table(name = "users")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@EntityListeners(AuditingEntityListener.class)
-public class UserEntity {
+public class UserEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,17 +41,6 @@ public class UserEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserStatus status;
-
-    @CreatedDate
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
-
-    @LastModifiedDate
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
 
     @Column(name = "inactivated_at")
     private LocalDateTime inactivatedAt;
@@ -79,8 +65,9 @@ public class UserEntity {
         if (profileUrl != null) this.profileUrl = profileUrl;
     }
 
+    @Override
     public void delete() {
         this.status = UserStatus.DELETED;
-        this.deletedAt = LocalDateTime.now();
+        super.delete();
     }
 }
