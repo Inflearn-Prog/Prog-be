@@ -63,4 +63,11 @@ public class UserController {
         OnboardingResponse response = userProfileService.saveBasicInfo(userId, request);
         return ApiResponse.success(response);
     }
+
+    @GetMapping("/me/profile")
+    public ApiResponse<UserProfileResponse> getProfile(@AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = Long.parseLong(userDetails.getUsername());
+        UserProfileResponse response = userProfileService.getProfile(userId);
+        return ApiResponse.success(response);
+    }
 }
