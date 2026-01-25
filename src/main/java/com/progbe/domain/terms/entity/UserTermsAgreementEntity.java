@@ -1,13 +1,12 @@
 package com.progbe.domain.terms.entity;
 
 import com.progbe.domain.user.entity.UserEntity;
+import com.progbe.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
@@ -15,9 +14,8 @@ import java.time.LocalDateTime;
 @Table(name = "user_terms_agreements")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@EntityListeners(AuditingEntityListener.class)
 @IdClass(UserTermsAgreementId.class)
-public class UserTermsAgreementEntity {
+public class UserTermsAgreementEntity extends BaseEntity {
 
     @Id
     @Column(name = "user_id")
@@ -45,10 +43,6 @@ public class UserTermsAgreementEntity {
 
     @Column(name = "agreed_at")
     private LocalDateTime agreedAt;
-
-    @LastModifiedDate
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
 
     @Builder
     public UserTermsAgreementEntity(UserEntity user, TermsEntity terms, LocalDateTime version, Boolean isAgreed) {
