@@ -11,7 +11,7 @@ import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
-    @Query("SELECT u FROM User u JOIN u.socialLinks s WHERE s.provider = :provider AND s.providerUserId = :providerUserId")
+    @Query("SELECT u FROM UserEntity u JOIN u.socialLinks s WHERE s.provider = :provider AND s.providerUserId = :providerUserId")
     Optional<UserEntity> findBySocialProviderAndId(@Param("provider") String provider, @Param("providerUserId") String providerUserId);
 
 
