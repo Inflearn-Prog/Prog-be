@@ -20,6 +20,11 @@ public enum ErrorCode {
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
     SOCIAL_UNLINK_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "소셜 연동 해제에 실패했습니다."),
 
+    INVALID_NICKNAME_FORMAT(HttpStatus.BAD_REQUEST, "닉네임은 한글, 영문, 숫자만 사용할 수 있으며 최대 12자입니다."),
+    NICKNAME_ALREADY_USED(HttpStatus.BAD_REQUEST, "이미 사용 중인 닉네임입니다."),
+    NICKNAME_CHANGE_TOO_FREQUENT(HttpStatus.BAD_REQUEST, "닉네임은 24시간에 한 번만 변경할 수 있습니다."),
+    INVALID_CAREER_YEAR(HttpStatus.BAD_REQUEST, "유효하지 않은 경력 연차 값입니다."),
+
     // 5XX
     TRANSACTION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "일시적인 오류로 작업에 실패했습니다."),
     SERVICE_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "현재 트래픽 폭주로 인해 요청을 처리할 수 없습니다."),
