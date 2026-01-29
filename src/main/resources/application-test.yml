@@ -1,0 +1,14 @@
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-id: test
+            client-secret: test
+          naver:
+            client-id: test
+            client-secret: test
+
+jwt:
+  secret: ${JWT_SECRET_KEY:__TEST_JWT_SECRET__}
