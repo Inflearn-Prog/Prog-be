@@ -76,4 +76,12 @@ public class UserProfileEntity {
         this.major = major;
         this.experienceYears = experienceYears;
     }
+
+    public void updateBio(String bio) {
+        this.bio = bio;
+    }
+
+    public void updateKeywords(List<String> keywords) {
+        this.keywords = keywords;
+    }
 }

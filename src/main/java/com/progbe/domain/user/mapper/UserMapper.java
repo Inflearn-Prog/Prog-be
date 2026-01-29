@@ -3,10 +3,7 @@ package com.progbe.domain.user.mapper;
 import com.progbe.domain.user.dto.OnboardingResponse;
 import com.progbe.domain.user.dto.UserProfileResponse;
 import com.progbe.domain.user.dto.UserWithdrawalResponse;
-import com.progbe.domain.user.entity.UserEntity;
-import com.progbe.domain.user.entity.UserProfileEntity;
-import com.progbe.domain.user.entity.UserSocialLinkEntity;
-import com.progbe.domain.user.entity.UserWithdrawalHistoryEntity;
+import com.progbe.domain.user.entity.*;
 import com.progbe.domain.user.type.*;
 import com.progbe.global.oauth.OAuth2Attributes;
 import org.springframework.stereotype.Component;
@@ -67,7 +64,11 @@ public class UserMapper {
                 .build();
     }
 
-    public UserProfileResponse toUserProfileResponse(UserEntity user, UserProfileEntity profile) {
+    public UserProfileResponse toUserProfileResponse(
+            UserEntity user,
+            UserProfileEntity profile,
+            List<String> experiences
+    ) {
         // 1. Basic Info
         String provider = user.getSocialLinks().stream()
                 .findFirst() // TODO : 여러 연동 계정 중 첫 번째를 대표로 표시
@@ -105,14 +106,24 @@ public class UserMapper {
         );
 
         // 3. Self Intro
-        List<String> keywords = profile != null ? profile.getKeywords() : List.of();
-        List<String> experiences = List.of(); //TODO : UserExperiencesEntity 추가 후 받아오는 로직 구현
+        List<String> keywords = (profile != null && profile.getKeywords() != null)
+                ? profile.getKeywords()
+                : List.of();
+
+        List<String> safeExperiences = experiences != null ? experiences : List.of();
 
         UserProfileResponse.SelfIntro selfIntro = new UserProfileResponse.SelfIntro(
-                experiences,
+                safeExperiences,
                 keywords
         );
 
         return new UserProfileResponse(basicInfo, careerInfo, selfIntro);
+    }
+
+    public UserExperiencesEntity toUserExperienceEntity(UserEntity user, String description) {
+        return UserExperiencesEntity.builder()
+                .user(user)
+                .description(description)
+                .build();
     }
 }
