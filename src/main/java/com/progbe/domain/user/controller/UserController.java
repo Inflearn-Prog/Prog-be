@@ -34,7 +34,6 @@ public class UserController {
 
     @DeleteMapping("/me")
     public ApiResponse<UserWithdrawalResponse> withdraw(
-            @PathVariable String uid,
             @RequestBody(required = false) UserWithdrawalRequest request,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
@@ -68,6 +67,16 @@ public class UserController {
     public ApiResponse<UserProfileResponse> getProfile(@AuthenticationPrincipal UserDetails userDetails) {
         Long userId = Long.parseLong(userDetails.getUsername());
         UserProfileResponse response = userProfileService.getProfile(userId);
+        return ApiResponse.success(response);
+    }
+
+    @PatchMapping("/me/profile")
+    public ApiResponse<UserProfileUpdateResponse> updateProfile(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Valid @RequestBody UserProfileUpdateRequest request
+    ) {
+        Long userId = Long.parseLong(userDetails.getUsername());
+        UserProfileUpdateResponse response = userProfileService.updateProfile(userId, request);
         return ApiResponse.success(response);
     }
 }

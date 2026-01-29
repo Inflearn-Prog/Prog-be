@@ -42,6 +42,9 @@ public class UserEntity extends BaseEntity {
     @Column(nullable = false)
     private UserStatus status;
 
+    @Column(name = "last_nickname_changed_at")
+    private LocalDateTime lastNicknameChangedAt;
+
     @Column(name = "inactivated_at")
     private LocalDateTime inactivatedAt;
 
@@ -63,6 +66,11 @@ public class UserEntity extends BaseEntity {
     public void updateProfile(String nickname, String profileUrl) {
         if (nickname != null) this.nickname = nickname;
         if (profileUrl != null) this.profileUrl = profileUrl;
+    }
+
+    public void changeNicknameManually(String nickname, LocalDateTime changedAt) {
+        this.nickname = nickname;
+        this.lastNicknameChangedAt = changedAt;
     }
 
     @Override
