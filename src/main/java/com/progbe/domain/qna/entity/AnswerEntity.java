@@ -1,10 +1,15 @@
 package com.progbe.domain.qna.entity;
 
+import com.progbe.domain.qna.dto.AnswerRequest;
 import com.progbe.domain.user.entity.UserEntity;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 
 @Entity
 @Table(name = "answer")
+@Builder
+@AllArgsConstructor
 public class AnswerEntity {
 
     @Id
@@ -46,4 +51,13 @@ public class AnswerEntity {
     public String getContent() {
         return content;
     }
+
+    public static AnswerEntity from(UserEntity user, QuestionEntity question, AnswerRequest answerRequest) {
+        return AnswerEntity.builder()
+                .admin(user)
+                .question(question)
+                .content(answerRequest.content())
+                .build();
+    }
+
 }
