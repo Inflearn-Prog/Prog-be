@@ -9,11 +9,13 @@ import com.progbe.domain.user.entity.UserSocialLinkEntity;
 import com.progbe.domain.user.mapper.UserMapper;
 import com.progbe.domain.user.repository.UserRepository;
 import com.progbe.domain.user.repository.UserWithdrawalHistoryRepository;
+import com.progbe.domain.user.type.Role;
 import com.progbe.domain.user.type.UserStatus;
 import com.progbe.global.error.ErrorCode;
 import com.progbe.global.error.exception.CustomException;
 import com.progbe.global.oauth.OAuth2Attributes;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -102,5 +104,17 @@ public class UserService {
                 .orElse("NONE");
 
         return userMapper.toWithdrawalResponse(user, providers);
+    }
+
+    // 유저 ID로 유저 전체 엔티티 가져오는 로직
+    public UserEntity getUserById(Long userId) {
+        return userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+    }
+
+    // 유저 권한 관리자 확인 로직
+    public boolean checkAdmin(Long userId) {
+        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        return user.getRole().equals(Role.ADMIN);
     }
 }
