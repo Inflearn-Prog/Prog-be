@@ -4,11 +4,18 @@ import com.progbe.domain.admin.dto.UserCountDto;
 import com.progbe.domain.prompt.entity.PromptCommentEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
+@Repository
 public interface PromptCommentRepository extends JpaRepository<PromptCommentEntity, Long> {
+    @Query("SELECT c FROM PromptCommentEntity c " +
+            "JOIN FETCH c.user " +
+            "WHERE c.prompt.id = :promptId " +
+            "ORDER BY COALESCE(c.parentId, c.id) ASC, c.createdAt ASC")
+    List<PromptCommentEntity> findAllByPromptId(Long promptId);
 
     @Query("SELECT COUNT(c) FROM PromptCommentEntity c WHERE c.user.id = :userId AND c.deletedAt IS NULL")
     long countByUserIdAndNotDeleted(@Param("userId") Long userId);
