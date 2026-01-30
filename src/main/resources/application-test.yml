@@ -4,11 +4,11 @@ spring:
       client:
         registration:
           kakao:
-            client-id: test
-            client-secret: test
+            client-id: ${KAKAO_CLIENT_ID:test}
+            client-secret: ${KAKAO_CLIENT_SECRET:test}
           naver:
-            client-id: test
-            client-secret: test
+            client-id: ${NAVER_CLIENT_ID:test}
+            client-secret: ${NAVER_CLIENT_SECRET:test}
 
 jwt:
   secret: ${JWT_SECRET_KEY:__TEST_JWT_SECRET__}
