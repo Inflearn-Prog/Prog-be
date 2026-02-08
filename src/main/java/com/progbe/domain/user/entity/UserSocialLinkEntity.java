@@ -28,7 +28,7 @@ public class UserSocialLinkEntity extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private UserEntity userEntity;
+    private UserEntity user;
 
     @Column(nullable = false)
     private String provider;
@@ -45,7 +45,7 @@ public class UserSocialLinkEntity extends BaseEntity {
 
     @Builder
     public UserSocialLinkEntity(UserEntity userEntity, String provider, String providerUserId, String socialRefreshToken) {
-        this.userEntity = userEntity;
+        this.user = userEntity;
         this.provider = provider;
         this.providerUserId = providerUserId;
         this.socialRefreshToken = socialRefreshToken;
