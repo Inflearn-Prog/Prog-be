@@ -2,11 +2,7 @@ package com.progbe.domain.prompt.service;
 
 import com.progbe.domain.category.entity.CategoryEntity;
 import com.progbe.domain.category.repository.CategoryRepository;
-import com.progbe.domain.prompt.dto.PromptCreateRequest;
-import com.progbe.domain.prompt.dto.PromptListResponse;
-import com.progbe.domain.prompt.dto.PromptResponse;
-import com.progbe.domain.prompt.dto.PromptSummaryResponse;
-import com.progbe.domain.prompt.dto.PromptUpdateRequest;
+import com.progbe.domain.prompt.dto.*;
 import com.progbe.domain.prompt.entity.PromptEntity;
 import com.progbe.domain.prompt.mapper.PromptMapper;
 import com.progbe.domain.prompt.repository.PromptRepository;
@@ -112,4 +108,3 @@ public class PromptService {
         promptRepository.save(prompt);
     }
 }
-

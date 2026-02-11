@@ -55,5 +55,6 @@ public class AdminResponse {
         private long count;
         private long increment;
         private double percentage;
+        private String status;
     }
 }

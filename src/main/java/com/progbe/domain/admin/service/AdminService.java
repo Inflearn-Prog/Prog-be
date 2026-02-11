@@ -91,12 +91,14 @@ public class AdminService {
         long previousCount = previousCounts.getOrDefault(type, 0L);
 
         long increment = currentCount - previousCount;
-        double percentage = statisticComponent.calculateRate(currentCount, previousCount);
+
+        StatisticComponent.StatisticResult statisticResult = statisticComponent.calculateRate(currentCount, previousCount);
 
         return adminMapper.toMetricInfo(
                 currentCount,
                 increment,
-                statisticComponent.roundToFirstDecimal(percentage)
+                statisticComponent.roundToFirstDecimal(statisticResult.rate()),
+                statisticResult.status()
         );
     }
 }

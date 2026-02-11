@@ -1,6 +1,7 @@
 package com.progbe.domain.admin.mapper;
 
 import com.progbe.domain.admin.dto.AdminResponse;
+import com.progbe.domain.admin.type.MetricCalculationStatus;
 import com.progbe.domain.user.entity.UserEntity;
 import com.progbe.global.common.CommonMapper;
 import org.springframework.data.domain.Page;
@@ -55,12 +56,14 @@ public class AdminMapper {
     public AdminResponse.MetricInfo toMetricInfo(
             long count,
             long increment,
-            double percentage
+            double percentage,
+            MetricCalculationStatus status
     ) {
         return AdminResponse.MetricInfo.builder()
                 .count(count)
                 .increment(increment)
                 .percentage(percentage)
+                .status(status.name())
                 .build();
     }
 }
