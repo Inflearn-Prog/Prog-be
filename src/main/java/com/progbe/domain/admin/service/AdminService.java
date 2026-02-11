@@ -5,12 +5,9 @@ import com.progbe.domain.admin.dto.AdminResponse;
 import com.progbe.domain.admin.entity.StatisticType;
 import com.progbe.domain.admin.mapper.AdminMapper;
 import com.progbe.domain.admin.repository.StatisticRepository;
-import com.progbe.domain.user.repository.UserRepository;
 import com.progbe.global.error.ErrorCode;
 import com.progbe.global.error.exception.CustomException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,16 +19,8 @@ import java.time.temporal.ChronoUnit;
 @RequiredArgsConstructor
 public class AdminService {
     private final StatisticRepository statisticRepository;
-    private final UserRepository userRepository;
     private final StatisticComponent statisticComponent;
     private final AdminMapper adminMapper;
-
-    // FIXME - start ============================
-    public AdminResponse.UserSearchResult searchUsers(String keyword, int page) {
-        Pageable pageable = PageRequest.of(page, 5);
-        return adminMapper.toUserSearchResult(userRepository.findByEmailContainingOrNicknameContaining(keyword, keyword, pageable));
-    }
-    // FIXME - end ============================
 
     @Transactional(readOnly = true)
     public AdminResponse.StatsSummaryResponse getStatsSummary(LocalDate startDate, LocalDate endDate) {

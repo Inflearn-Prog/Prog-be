@@ -23,5 +23,10 @@ public interface PromptRepository extends JpaRepository<PromptEntity, Long> {
 
     @Query("SELECT COUNT(p) FROM PromptEntity p WHERE p.user.id = :userId AND p.deletedAt IS NULL")
     long countByUserIdAndNotDeleted(@Param("userId") Long userId);
+
+    @Query("SELECT p.user.id, COUNT(p) FROM PromptEntity p " +
+           "WHERE p.user.id IN :userIds AND p.deletedAt IS NULL " +
+           "GROUP BY p.user.id")
+    List<Object[]> countByUserIdsGrouped(@Param("userIds") List<Long> userIds);
 }
 
