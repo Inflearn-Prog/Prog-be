@@ -25,11 +25,13 @@ public class AdminRequest {
         }
 
         private void validate() {
+            LocalDate today = LocalDate.now();
+
             if (startDate.isAfter(endDate)) {
                 throw new CustomException(ErrorCode.INVALID_DATE_RANGE);
             }
 
-            if (startDate.isAfter(LocalDate.now()) || endDate.isAfter(LocalDate.now())) {
+            if (startDate.isAfter(today) || endDate.isAfter(today)) {
                 throw new CustomException(ErrorCode.FUTURE_DATE_NOT_ALLOWED);
             }
 
