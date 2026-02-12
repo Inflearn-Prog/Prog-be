@@ -2,6 +2,7 @@ package com.progbe.domain.admin.service;
 
 import com.progbe.domain.admin.dto.AdminUserRequest;
 import com.progbe.domain.admin.dto.AdminUserResponse;
+import com.progbe.domain.admin.dto.UserCountDto;
 import com.progbe.domain.admin.mapper.AdminMapper;
 import com.progbe.domain.prompt.repository.PromptCommentRepository;
 import com.progbe.domain.prompt.repository.PromptRepository;
@@ -17,7 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -45,13 +45,13 @@ public class AdminUserService {
                 .collect(Collectors.toList());
 
         if (userIds.isEmpty()) {
-            return adminMapper.toUserListResponse(userPage, Map.of(), Map.of());
+            return adminMapper.toUserListResponse(userPage, List.of(), List.of());
         }
 
-        Map<Long, Long> promptCountMap = getPromptCountMap(userIds);
-        Map<Long, Long> commentCountMap = getCommentCountMap(userIds);
+        List<UserCountDto> promptCounts = promptRepository.countByUserIdsGrouped(userIds);
+        List<UserCountDto> commentCounts = promptCommentRepository.countByUserIdsGrouped(userIds);
 
-        return adminMapper.toUserListResponse(userPage, promptCountMap, commentCountMap);
+        return adminMapper.toUserListResponse(userPage, promptCounts, commentCounts);
     }
 
     @Transactional
@@ -101,39 +101,5 @@ public class AdminUserService {
         }
 
         return distinctUserIds;
-    }
-
-    private Map<Long, Long> getPromptCountMap(List<Long> userIds) {
-        List<Object[]> results = promptRepository.countByUserIdsGrouped(userIds);
-        Map<Long, Long> countMap = new java.util.HashMap<>();
-        
-        for (Object[] result : results) {
-            Long userId = (Long) result[0];
-            Long count = (Long) result[1];
-            countMap.put(userId, count);
-        }
-        
-        for (Long userId : userIds) {
-            countMap.putIfAbsent(userId, 0L);
-        }
-        
-        return countMap;
-    }
-
-    private Map<Long, Long> getCommentCountMap(List<Long> userIds) {
-        List<Object[]> results = promptCommentRepository.countByUserIdsGrouped(userIds);
-        Map<Long, Long> countMap = new java.util.HashMap<>();
-        
-        for (Object[] result : results) {
-            Long userId = (Long) result[0];
-            Long count = (Long) result[1];
-            countMap.put(userId, count);
-        }
-        
-        for (Long userId : userIds) {
-            countMap.putIfAbsent(userId, 0L);
-        }
-        
-        return countMap;
     }
 }

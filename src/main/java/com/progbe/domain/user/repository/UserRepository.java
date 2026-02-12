@@ -24,13 +24,6 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     boolean existsByNickname(String nickname);
 
-    //명확한 검색 조건을 모르겠어서 일단은 피그마에 보이는 대로 구현했습니다
-    Page<UserEntity> findByEmailContainingOrNicknameContaining(
-            String email,
-            String nickname,
-            Pageable pageable
-    );
-
     @Query("SELECT u FROM UserEntity u WHERE u.nickname LIKE %:keyword% ORDER BY u.createdAt DESC")
     Page<UserEntity> findByNicknameContaining(@Param("keyword") String keyword, Pageable pageable);
 

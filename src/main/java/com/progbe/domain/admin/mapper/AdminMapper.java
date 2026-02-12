@@ -1,8 +1,9 @@
 package com.progbe.domain.admin.mapper;
 
 import com.progbe.domain.admin.dto.AdminResponse;
-import com.progbe.domain.admin.type.MetricCalculationStatus;
 import com.progbe.domain.admin.dto.AdminUserResponse;
+import com.progbe.domain.admin.dto.UserCountDto;
+import com.progbe.domain.admin.type.MetricCalculationStatus;
 import com.progbe.domain.user.entity.UserEntity;
 import com.progbe.global.common.CommonMapper;
 import org.springframework.data.domain.Page;
@@ -51,9 +52,15 @@ public class AdminMapper {
 
     public AdminUserResponse.UserListResponse toUserListResponse(
             Page<UserEntity> userPage,
-            Map<Long, Long> promptCountMap,
-            Map<Long, Long> commentCountMap
+            List<UserCountDto> promptCounts,
+            List<UserCountDto> commentCounts
     ) {
+        Map<Long, Long> promptCountMap = promptCounts.stream()
+                .collect(Collectors.toMap(UserCountDto::getUserId, UserCountDto::getCount));
+
+        Map<Long, Long> commentCountMap = commentCounts.stream()
+                .collect(Collectors.toMap(UserCountDto::getUserId, UserCountDto::getCount));
+
         List<AdminUserResponse.UserInfo> userInfoList = userPage.getContent().stream()
                 .map(user -> AdminUserResponse.UserInfo.builder()
                         .userId(user.getId())

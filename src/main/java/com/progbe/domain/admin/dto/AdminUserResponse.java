@@ -26,8 +26,8 @@ public class AdminUserResponse {
         private Long userId;
         private String nickname;
         private Role role;
-        private Long promptCount;
-        private Long commentCount;
+        private long promptCount;
+        private long commentCount;
         private UserStatus status;
     }
 
