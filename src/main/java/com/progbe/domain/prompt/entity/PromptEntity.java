@@ -41,6 +41,9 @@ public class PromptEntity extends BaseEntity {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
+    @OneToOne(mappedBy = "prompt", cascade = CascadeType.ALL, orphanRemoval = true)
+    private PromptStatusEntity statusEntity;
+
     @Builder
     public PromptEntity(UserEntity user, CategoryEntity category, String title, String content) {
         this.user = user;
@@ -59,6 +62,11 @@ public class PromptEntity extends BaseEntity {
         if (content != null) {
             this.content = content;
         }
+    }
+
+    //프롬프트 생성 시 또는 status 테이블과 연결 시
+    public void attachStatus(PromptStatusEntity statusEntity) {
+        this.statusEntity = statusEntity;
     }
 }
 
