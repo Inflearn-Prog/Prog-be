@@ -2,16 +2,12 @@ package com.progbe.domain.prompt.entity;
 
 import com.progbe.domain.category.entity.CategoryEntity;
 import com.progbe.domain.user.entity.UserEntity;
+import com.progbe.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Table(
@@ -24,8 +20,7 @@ import java.time.LocalDateTime;
 )
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@EntityListeners(AuditingEntityListener.class)
-public class PromptEntity {
+public class PromptEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,17 +41,6 @@ public class PromptEntity {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    @CreatedDate
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
-
-    @LastModifiedDate
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
-
     @Builder
     public PromptEntity(UserEntity user, CategoryEntity category, String title, String content) {
         this.user = user;
@@ -75,10 +59,6 @@ public class PromptEntity {
         if (content != null) {
             this.content = content;
         }
-    }
-
-    public void delete() {
-        this.deletedAt = LocalDateTime.now();
     }
 }
 
