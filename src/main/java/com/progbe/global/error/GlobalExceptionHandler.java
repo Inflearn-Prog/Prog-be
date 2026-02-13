@@ -6,6 +6,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+
+import java.time.LocalDate;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -33,6 +36,25 @@ public class GlobalExceptionHandler {
                 message != null ? message : ErrorCode.INVALID_INPUT_VALUE.getMessage()
         );
 
+        return new ResponseEntity<>(response, ErrorCode.INVALID_INPUT_VALUE.getStatus());
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    protected ResponseEntity<ApiResponse<Void>> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
+        if (e.getRequiredType() != null && e.getRequiredType().equals(LocalDate.class)) {
+            ApiResponse<Void> response = ApiResponse.fail(
+                    String.valueOf(ErrorCode.INVALID_DATE_FORMAT.getStatus().value()),
+                    ErrorCode.INVALID_DATE_FORMAT.name(),
+                    ErrorCode.INVALID_DATE_FORMAT.getMessage()
+            );
+            return new ResponseEntity<>(response, ErrorCode.INVALID_DATE_FORMAT.getStatus());
+        }
+
+        ApiResponse<Void> response = ApiResponse.fail(
+                String.valueOf(ErrorCode.INVALID_INPUT_VALUE.getStatus().value()),
+                ErrorCode.INVALID_INPUT_VALUE.name(),
+                ErrorCode.INVALID_INPUT_VALUE.getMessage()
+        );
         return new ResponseEntity<>(response, ErrorCode.INVALID_INPUT_VALUE.getStatus());
     }
 

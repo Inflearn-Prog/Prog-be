@@ -1,61 +1,21 @@
 package com.progbe.domain.admin.mapper;
 
 import com.progbe.domain.admin.dto.AdminResponse;
-import com.progbe.domain.admin.entity.ReportEntity;
-import com.progbe.domain.admin.entity.StatisticType;
+import com.progbe.domain.admin.type.MetricCalculationStatus;
 import com.progbe.domain.user.entity.UserEntity;
 import com.progbe.global.common.CommonMapper;
-import com.progbe.global.common.CommonResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
+import java.time.LocalDate;
+import java.util.List;
 
 
 @Component
 public class AdminMapper {
-    public AdminResponse.DailyStatisticSummaryResponse toDailyStatisticSummaryResponse(
-            Map<StatisticType, Double> rateMap,
-            Map<StatisticType, Long> todayCountMap
-    ) {
-        List<AdminResponse.StatisticCompareResponse> responses = new ArrayList<>();
 
-        for (StatisticType type : rateMap.keySet()) {
-
-            responses.add(
-                    AdminResponse.StatisticCompareResponse.builder()
-                            .type(type.toString())
-                            .count(todayCountMap.get(type))
-                            .changeRate(rateMap.get(type))
-                            .build()
-            );
-        }
-
-        return AdminResponse.DailyStatisticSummaryResponse.builder()
-                .statistics(responses)
-                .build();
-    }
-
-    public AdminResponse.PendingReportListResponse toPendingReportListResponse(List<ReportEntity> pendingReports)
-    {
-        List<AdminResponse.PendingReportResponse> reports = pendingReports.stream()
-                .map(report -> AdminResponse.PendingReportResponse.builder()
-                        .nickName(report.getNickName())
-                        .content(report.getContent())
-                        .timeAgo(CommonMapper.toRelativeTime(report.getCreatedAt()))
-                        .build()
-                )
-                .toList();
-
-        return AdminResponse.PendingReportListResponse.builder()
-                .pendingReports(reports)
-                .totalCount(reports.size())
-                .build();
-    }
-    public AdminResponse.UserSearchResult toUserSearchResult(Page<UserEntity> page)
-    {
+    // FIXME - start ============================
+    public AdminResponse.UserSearchResult toUserSearchResult(Page<UserEntity> page) {
 
         List<AdminResponse.UserSearch> userSearchList = page.stream()
                 .map(user -> AdminResponse.UserSearch.builder()
@@ -73,6 +33,38 @@ public class AdminMapper {
                 .pageInfoResponse(CommonMapper.toPageInfoResponse(page))
                 .build();
     }
+    // FIXME - end ============================
 
+    public AdminResponse.StatsSummaryResponse toStatsSummaryResponse(
+            LocalDate startDate,
+            LocalDate endDate,
+            AdminResponse.MetricInfo newUsers,
+            AdminResponse.MetricInfo newPrompts,
+            AdminResponse.MetricInfo copyCount
+    ) {
+        return AdminResponse.StatsSummaryResponse.builder()
+                .period(AdminResponse.PeriodInfo.builder()
+                        .startDate(startDate.toString())
+                        .endDate(endDate.toString())
+                        .build())
+                .newUsers(newUsers)
+                .newPrompts(newPrompts)
+                .copyCount(copyCount)
+                .build();
+    }
+
+    public AdminResponse.MetricInfo toMetricInfo(
+            long count,
+            long increment,
+            double percentage,
+            MetricCalculationStatus status
+    ) {
+        return AdminResponse.MetricInfo.builder()
+                .count(count)
+                .increment(increment)
+                .percentage(percentage)
+                .status(status.name())
+                .build();
+    }
 }
 

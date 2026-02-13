@@ -32,11 +32,18 @@ public enum ErrorCode {
     NOT_QUESTION_WRITER(HttpStatus.FORBIDDEN, "해당 문의사항의 작성자가 아닙니다."),
     NOT_ADMIN(HttpStatus.FORBIDDEN, "관리자 권한이 필요합니다."),
 
+    INVALID_DATE_RANGE(HttpStatus.BAD_REQUEST, "시작일은 종료일보다 이전이어야 하며, YYYY-MM-DD 형식을 준수해야 합니다."),
+    INVALID_DATE_FORMAT(HttpStatus.BAD_REQUEST, "날짜 형식이 올바르지 않습니다. YYYY-MM-DD 형식을 사용해주세요."),
+    FUTURE_DATE_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "미래 날짜는 조회할 수 없습니다."),
+    DATE_RANGE_EXCEEDED(HttpStatus.BAD_REQUEST, "조회 가능한 최대 기간은 30일입니다."),
+
+    
     // 5XX
     TRANSACTION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "일시적인 오류로 작업에 실패했습니다."),
     SERVICE_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "현재 트래픽 폭주로 인해 요청을 처리할 수 없습니다."),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내 오류입니다."),
     CONSTRUCTION_NOT_ALLOWED(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내 오류입니다."),
+    STATISTICS_NOT_READY(HttpStatus.INTERNAL_SERVER_ERROR, "통계 데이터 집계가 완료되지 않았습니다. 잠시 후 다시 시도해주세요."),
     DATA_CONVERSION_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "데이터 변환 중 오류가 발생했습니다.");
 
     private final HttpStatus status;

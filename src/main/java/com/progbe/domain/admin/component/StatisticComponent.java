@@ -1,19 +1,34 @@
 package com.progbe.domain.admin.component;
 
-
+import com.progbe.domain.admin.type.MetricCalculationStatus;
 import org.springframework.stereotype.Component;
 
 @Component
 public class StatisticComponent {
 
+    public record StatisticResult(double rate, MetricCalculationStatus status) {
+    }
 
-    public double calculateRate(long today, long yesterday) {
+    public StatisticResult calculateRate(long current, long previous) {
 
-        // 어제 데이터가 없을 때
-        if (yesterday == 0) {
-            return today > 0 ? 100.0 : 0.0;
+        if (current < 0) {
+            return new StatisticResult(0.0, MetricCalculationStatus.INVALID_INPUT);
         }
 
-        return ((double) (today - yesterday) / yesterday) * 100;
+        if (previous < 0) {
+            return new StatisticResult(0.0, MetricCalculationStatus.INVALID_INPUT);
+        }
+
+        if (previous == 0) {
+            double rate = current > 0 ? 100.0 : 0.0;
+            return new StatisticResult(rate, MetricCalculationStatus.ZERO_PREVIOUS);
+        }
+
+        double rate = ((double) (current - previous) / previous) * 100;
+        return new StatisticResult(rate, MetricCalculationStatus.SUCCESS);
+    }
+
+    public double roundToFirstDecimal(double value) {
+        return Math.round(value * 10.0) / 10.0;
     }
 }

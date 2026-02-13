@@ -11,13 +11,17 @@ import lombok.NoArgsConstructor;
 import static lombok.AccessLevel.PROTECTED;
 
 @Entity
+@Table(
+        name = "statistics",
+        indexes = {
+                @Index(name = "idx_statistics_type_created_at", columnList = "type, created_at")
+        }
+)
 @Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = PROTECTED)
-public class StatisticEntity extends BaseEntity
-{
-
+public class StatisticEntity extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,9 +31,4 @@ public class StatisticEntity extends BaseEntity
     @NotNull
     @Enumerated(EnumType.STRING)
     private StatisticType type;
-
-
-    public void increaseCount() {
-        count++;
-    }
 }
