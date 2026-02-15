@@ -73,6 +73,10 @@ public class UserEntity extends BaseEntity {
         this.lastNicknameChangedAt = changedAt;
     }
 
+    public void updateStatus(UserStatus status) {
+        this.status = status;
+    }
+
     @Override
     public void delete() {
         this.status = UserStatus.DELETED;

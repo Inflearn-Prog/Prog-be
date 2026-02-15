@@ -10,6 +10,10 @@ import com.progbe.domain.admin.service.AdminPromptService;
 import com.progbe.domain.admin.service.AdminService;
 import com.progbe.domain.admin.service.AdminUserService;
 import com.progbe.domain.prompt.type.PromptStatus;
+import com.progbe.domain.report.dto.PendingReportListResponse;
+import com.progbe.domain.report.dto.ReportProcessRequest;
+import com.progbe.domain.report.dto.ReportProcessResponse;
+import com.progbe.domain.report.service.AdminReportService;
 import com.progbe.global.common.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +32,7 @@ public class AdminController {
     private final AdminService adminService;
     private final AdminUserService adminUserService;
     private final AdminPromptService adminPromptService;
+    private final AdminReportService adminReportService;
 
     @GetMapping("/stats/summary")
     public ResponseEntity<ApiResponse<AdminResponse.StatsSummaryResponse>> getStatsSummary(
@@ -102,6 +107,24 @@ public class AdminController {
             @Valid @RequestBody AdminPromptRequest.BulkDeleteRequest request
     ) {
         AdminPromptResponse.BulkDeleteResponse response = adminPromptService.bulkDeletePrompts(request);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @GetMapping("/reports/pending")
+    public ResponseEntity<ApiResponse<PendingReportListResponse>> getPendingReports(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size
+    ) {
+        PendingReportListResponse response = adminReportService.getPendingReports(page, size);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @PatchMapping("/reports/{reportId}/process")
+    public ResponseEntity<ApiResponse<ReportProcessResponse>> processReport(
+            @PathVariable Long reportId,
+            @Valid @RequestBody ReportProcessRequest request
+    ) {
+        ReportProcessResponse response = adminReportService.processReport(reportId, request);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 }

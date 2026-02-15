@@ -40,6 +40,15 @@ public enum ErrorCode {
 
     INVALID_CATEGORY(HttpStatus.BAD_REQUEST, "유효하지 않은 카테고리 정보가 포함되어 있습니다."),
     PROMPTS_NOT_FOUND(HttpStatus.NOT_FOUND, "요청한 프롬프트 ID 중 존재하는 게시글이 없습니다."),
+
+    CANNOT_REPORT_SELF(HttpStatus.BAD_REQUEST, "자신의 컨텐츠를 신고할 수 없습니다."),
+    ALREADY_REPORTED(HttpStatus.CONFLICT, "이미 신고된 항목입니다."),
+    TEXT_TOO_LONG(HttpStatus.BAD_REQUEST, "200자를 초과할 수 없습니다."),
+    REPORT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 신고 내역입니다."),
+    ALREADY_PROCESSED(HttpStatus.CONFLICT, "이미 처리되었거나 존재하지 않는 신고 내역입니다."),
+    INVALID_PAGE_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 페이징 또는 정렬 요청입니다."),
+    DATABASE_TIMEOUT(HttpStatus.SERVICE_UNAVAILABLE, "서버 응답이 지연되고 있습니다. 관리자에게 문의하세요."),
+
     TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "만료된 토큰입니다."),
     TOKEN_REVOKED(HttpStatus.UNAUTHORIZED, "무효화된 토큰입니다."),
 
