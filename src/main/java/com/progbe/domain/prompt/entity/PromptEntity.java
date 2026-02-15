@@ -1,6 +1,7 @@
 package com.progbe.domain.prompt.entity;
 
 import com.progbe.domain.category.entity.CategoryEntity;
+import com.progbe.domain.prompt.type.PromptStatus;
 import com.progbe.domain.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -19,7 +20,9 @@ import java.time.LocalDateTime;
         indexes = {
                 @Index(name = "idx_prompts_user_id", columnList = "user_id"),
                 @Index(name = "idx_prompts_category_id", columnList = "category_id"),
-                @Index(name = "idx_prompts_created_at", columnList = "created_at")
+                @Index(name = "idx_prompts_created_at", columnList = "created_at"),
+                @Index(name = "idx_prompts_status", columnList = "status"),
+                @Index(name = "idx_prompts_status_created_at", columnList = "status, created_at")
         }
 )
 @Getter
@@ -57,6 +60,10 @@ public class PromptEntity {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, columnDefinition = "VARCHAR(20) DEFAULT 'PUBLIC'")
+    private PromptStatus status = PromptStatus.PUBLIC;
+
     @Builder
     public PromptEntity(UserEntity user, CategoryEntity category, String title, String content) {
         this.user = user;
@@ -79,6 +86,17 @@ public class PromptEntity {
 
     public void delete() {
         this.deletedAt = LocalDateTime.now();
+        this.status = PromptStatus.DELETED;
+    }
+
+    public void updateStatus(PromptStatus status) {
+        this.status = status;
+        if (status == PromptStatus.DELETED && this.deletedAt == null) {
+            this.deletedAt = LocalDateTime.now();
+        }
+    }
+
+    public void updateCategory(CategoryEntity category) {
+        this.category = category;
     }
 }
-

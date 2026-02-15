@@ -2,6 +2,7 @@ package com.progbe.global.error;
 
 import com.progbe.global.common.ApiResponse;
 import com.progbe.global.error.exception.CustomException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -48,6 +49,16 @@ public class GlobalExceptionHandler {
                     ErrorCode.INVALID_DATE_FORMAT.getMessage()
             );
             return new ResponseEntity<>(response, ErrorCode.INVALID_DATE_FORMAT.getStatus());
+        }
+
+        if (e.getRequiredType() != null && e.getRequiredType().isEnum()) {
+            String typeName = e.getRequiredType().getSimpleName();
+            ApiResponse<Void> response = ApiResponse.fail(
+                    "400",
+                    "INVALID_PARAMETER",
+                    String.format("잘못된 %s 값입니다. 입력값을 확인해주세요.", typeName)
+            );
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
 
         ApiResponse<Void> response = ApiResponse.fail(

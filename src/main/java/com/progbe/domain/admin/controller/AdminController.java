@@ -1,11 +1,15 @@
 package com.progbe.domain.admin.controller;
 
+import com.progbe.domain.admin.dto.AdminPromptRequest;
+import com.progbe.domain.admin.dto.AdminPromptResponse;
 import com.progbe.domain.admin.dto.AdminRequest;
 import com.progbe.domain.admin.dto.AdminResponse;
 import com.progbe.domain.admin.dto.AdminUserRequest;
 import com.progbe.domain.admin.dto.AdminUserResponse;
+import com.progbe.domain.admin.service.AdminPromptService;
 import com.progbe.domain.admin.service.AdminService;
 import com.progbe.domain.admin.service.AdminUserService;
+import com.progbe.domain.prompt.type.PromptStatus;
 import com.progbe.global.common.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +27,7 @@ import java.time.LocalDate;
 public class AdminController {
     private final AdminService adminService;
     private final AdminUserService adminUserService;
+    private final AdminPromptService adminPromptService;
 
     @GetMapping("/stats/summary")
     public ResponseEntity<ApiResponse<AdminResponse.StatsSummaryResponse>> getStatsSummary(
@@ -38,7 +43,6 @@ public class AdminController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    // 기존의 /user/search 대체
     @GetMapping("/users")
     public ResponseEntity<ApiResponse<AdminUserResponse.UserListResponse>> getUserList(
             @RequestParam(required = false) String keyword,
@@ -64,6 +68,40 @@ public class AdminController {
     ) {
         Long currentUserId = Long.parseLong(userDetails.getUsername());
         AdminUserResponse.BulkUpdateResponse response = adminUserService.bulkUpdateRole(currentUserId, request);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @GetMapping("/prompts")
+    public ResponseEntity<ApiResponse<AdminPromptResponse.PromptListResponse>> getPromptList(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) PromptStatus status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        AdminPromptResponse.PromptListResponse response = adminPromptService.getPromptList(
+                keyword,
+                categoryId,
+                status,
+                page,
+                size
+        );
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @PatchMapping("/prompts/bulk-update")
+    public ResponseEntity<ApiResponse<AdminPromptResponse.BulkUpdateResponse>> bulkUpdatePrompts(
+            @Valid @RequestBody AdminPromptRequest.BulkUpdateRequest request
+    ) {
+        AdminPromptResponse.BulkUpdateResponse response = adminPromptService.bulkUpdatePrompts(request);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @DeleteMapping("/prompts/bulk")
+    public ResponseEntity<ApiResponse<AdminPromptResponse.BulkDeleteResponse>> bulkDeletePrompts(
+            @Valid @RequestBody AdminPromptRequest.BulkDeleteRequest request
+    ) {
+        AdminPromptResponse.BulkDeleteResponse response = adminPromptService.bulkDeletePrompts(request);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 }
