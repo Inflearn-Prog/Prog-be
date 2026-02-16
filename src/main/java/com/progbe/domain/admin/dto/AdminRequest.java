@@ -15,11 +15,11 @@ public class AdminRequest {
                                       @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) {
         private static final int MAX_DATE_RANGE_DAYS = 30;
 
-        public StatsSummaryRequest(LocalDate startDate, LocalDate endDate) {
+        public StatsSummaryRequest {
             LocalDate today = LocalDate.now();
 
-            this.startDate = (startDate != null) ? startDate : today;
-            this.endDate = (endDate != null) ? endDate : today;
+            startDate = (startDate != null) ? startDate : today;
+            endDate = (endDate != null) ? endDate : today;
 
             validate();
         }
@@ -39,16 +39,6 @@ public class AdminRequest {
             if (daysBetween > MAX_DATE_RANGE_DAYS) {
                 throw new CustomException(ErrorCode.DATE_RANGE_EXCEEDED);
             }
-        }
-
-        @Override
-        public LocalDate startDate() {
-            return startDate;
-        }
-
-        @Override
-        public LocalDate endDate() {
-            return endDate;
         }
     }
 }
