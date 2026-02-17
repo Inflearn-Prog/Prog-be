@@ -31,8 +31,13 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshTokenEntity
     void revokeByTokenValue(@Param("tokenValue") String tokenValue);
 
     @Modifying
-    @Query("DELETE FROM RefreshTokenEntity rt WHERE rt.expiresAt < :now OR rt.isRevoked = true")
-    void deleteExpiredAndRevokedTokens(@Param("now") LocalDateTime now);
+    @Query("DELETE FROM RefreshTokenEntity rt WHERE " +
+           "rt.expiresAt < :expiryThreshold OR " +
+           "(rt.isRevoked = true AND rt.updatedAt < :revokedThreshold)")
+    void deleteExpiredAndRevokedTokens(
+            @Param("expiryThreshold") LocalDateTime expiryThreshold,
+            @Param("revokedThreshold") LocalDateTime revokedThreshold
+    );
 
     @Modifying
     @Query("UPDATE RefreshTokenEntity rt SET rt.isRevoked = true WHERE rt.userId = :userId AND rt.deviceInfo = :deviceInfo AND rt.isRevoked = false")

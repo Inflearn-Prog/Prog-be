@@ -19,8 +19,11 @@ public class RefreshTokenCleanupScheduler {
     @Scheduled(cron = "0 0 3 * * *")
     @Transactional
     public void cleanupExpiredTokens() {
-        log.info("만료된 Refresh Token 정리 시작");
-        refreshTokenRepository.deleteExpiredAndRevokedTokens(LocalDateTime.now());
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime revokedThreshold = now.minusDays(30); // TODO : 구체적인 시간은 협의 후 재적용
+        
+        log.info("만료된 Refresh Token 정리 시작 (revoked 토큰은 30일 보관)");
+        refreshTokenRepository.deleteExpiredAndRevokedTokens(now, revokedThreshold);
         log.info("만료된 Refresh Token 정리 완료");
     }
 }
