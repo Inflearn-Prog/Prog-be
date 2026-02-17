@@ -79,4 +79,14 @@ public class UserController {
         UserProfileUpdateResponse response = userProfileService.updateProfile(userId, request);
         return ApiResponse.success(response);
     }
+
+    @PostMapping("/nickname")
+    public ApiResponse<NicknameRegisterResponse> registerNickname(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Valid @RequestBody NicknameRegisterRequest request
+    ) {
+        Long userId = Long.parseLong(userDetails.getUsername());
+        NicknameRegisterResponse response = userProfileService.registerNickname(userId, request.nickname());
+        return ApiResponse.success(response);
+    }
 }

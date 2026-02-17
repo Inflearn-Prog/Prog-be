@@ -14,6 +14,7 @@ import com.progbe.domain.user.type.JobRole;
 import com.progbe.global.error.ErrorCode;
 import com.progbe.global.error.exception.CustomException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +25,11 @@ import java.util.regex.Pattern;
 @Service
 @RequiredArgsConstructor
 public class UserProfileService {
+
+    // TODO : 우선은 한/영/숫자만 허용. 정책 확인 필요
+    private static final Pattern NICKNAME_PATTERN = Pattern.compile("^[가-힣a-zA-Z0-9]{1,12}$");
+    private static final int NICKNAME_FREE_CHANGE_LIMIT = 2;
+    private static final int NICKNAME_CHANGE_COOLDOWN_HOURS = 24;
 
     private final UserProfileRepository userProfileRepository;
     private final UserRepository userRepository;
@@ -91,9 +97,19 @@ public class UserProfileService {
         return new UserProfileUpdateResponse("프로필 정보가 성공적으로 저장되었습니다.");
     }
 
-    // TODO : 우선은 한/영/숫자만 허용. 정책 확인 필요
-    private static final Pattern NICKNAME_PATTERN =
-            Pattern.compile("^[가-힣a-zA-Z0-9]{1,12}$");
+    @Transactional
+    public NicknameRegisterResponse registerNickname(Long userId, String nickname) {
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        try {
+            validateAndChangeNickname(user, nickname);
+            return new NicknameRegisterResponse("닉네임이 성공적으로 등록되었습니다.");
+        } catch (DataIntegrityViolationException e) {
+            throw new CustomException(ErrorCode.NICKNAME_ALREADY_USED);
+        }
+    }
+
 
     private void updateBasicInfo(UserEntity user, UserProfileEntity profile,
                                  UserProfileUpdateRequest.BasicInfo basicInfo) {
@@ -126,21 +142,39 @@ public class UserProfileService {
             return;
         }
 
-        if (!NICKNAME_PATTERN.matcher(nickname).matches()) {
+        try {
+            validateAndChangeNickname(user, nickname);
+        } catch (DataIntegrityViolationException e) {
+            throw new CustomException(ErrorCode.NICKNAME_ALREADY_USED);
+        }
+    }
+
+    private void validateAndChangeNickname(UserEntity user, String nickname) {
+        String trimmedNickname = nickname.trim();
+
+        if (trimmedNickname.isEmpty()) {
             throw new CustomException(ErrorCode.INVALID_NICKNAME_FORMAT);
         }
 
-        if (userRepository.existsByNickname(nickname)) {
+        if (!NICKNAME_PATTERN.matcher(trimmedNickname).matches()) {
+            throw new CustomException(ErrorCode.INVALID_NICKNAME_FORMAT);
+        }
+
+        if (userRepository.existsByNickname(trimmedNickname)) {
             throw new CustomException(ErrorCode.NICKNAME_ALREADY_USED);
         }
 
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime lastChangedAt = user.getLastNicknameChangedAt();
-        if (lastChangedAt != null && lastChangedAt.plusHours(24).isAfter(now)) {
-            throw new CustomException(ErrorCode.NICKNAME_CHANGE_TOO_FREQUENT);
+        Integer currentChangeCount = user.getNicknameChangeCount();
+
+        if (currentChangeCount >= NICKNAME_FREE_CHANGE_LIMIT) {
+            LocalDateTime lastChangedAt = user.getLastNicknameChangedAt();
+            if (lastChangedAt != null && lastChangedAt.plusHours(NICKNAME_CHANGE_COOLDOWN_HOURS).isAfter(now)) {
+                throw new CustomException(ErrorCode.NICKNAME_CHANGE_TOO_FREQUENT);
+            }
         }
 
-        user.changeNicknameManually(nickname, now);
+        user.changeNicknameManually(trimmedNickname, now);
     }
 
     private void updateCareerInfo(UserProfileEntity profile,
