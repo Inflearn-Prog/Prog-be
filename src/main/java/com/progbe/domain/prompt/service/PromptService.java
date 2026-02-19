@@ -128,4 +128,24 @@ public class PromptService {
                 promptEntities.getTotalElements()
         );
     }
+
+    // 좋아요순 프롬프트 띄어주기 로직 (#31)
+    public PromptListResponse getPromptsSortedLikeCount(Pageable pageable) {
+        Page<PromptEntity> promptEntities = promptRepository.findPromptSortedLikeCount(pageable);
+
+        List<PromptSummaryResponse> promptList = promptEntities.getContent().stream()
+                .map(entity -> new PromptSummaryResponse(
+                        entity.getId(),
+                        promptMapper.toCategoryResponse(entity.getCategory()),
+                        entity.getTitle(),
+                        entity.getCreatedAt(),
+                        entity.getUpdatedAt()
+                ))
+                .toList();
+
+        return new PromptListResponse(
+                promptList,
+                promptEntities.getTotalElements()
+        );
+    }
 }
