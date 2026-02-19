@@ -13,10 +13,14 @@ import com.progbe.global.error.ErrorCode;
 import com.progbe.global.error.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @Service
@@ -147,5 +151,18 @@ public class PromptService {
                 promptList,
                 promptEntities.getTotalElements()
         );
+    }
+
+    // 오늘의 좋아요를 가장 많이 받은 프롬프트 띄어주기 로직 (#31)
+    // LocalDateTime 을 이용해서 오늘 (= 00시 ~ 23시 59분) 으로 설정했습니다.
+    public List<PromptSummaryResponse> getDailyHotPrompts() {
+        LocalDateTime start = LocalDate.now().atStartOfDay();
+        LocalDateTime end = LocalDateTime.of(LocalDate.now(), LocalTime.MAX);
+
+        Pageable topFive = PageRequest.of(0, 3);
+
+        List<PromptEntity> promptEntities = promptRepository.findDailyHotPrompts(start, end, topFive);
+
+        return promptMapper.toPromptSummaryResponseList(promptEntities);
     }
 }

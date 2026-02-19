@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,5 +44,18 @@ public interface PromptRepository extends JpaRepository<PromptEntity, Long> {
             "GROUP BY p.id, p.category.id " +
             "ORDER BY COUNT(pl) DESC, p.createdAt DESC")
     Page<PromptEntity> findPromptSortedLikeCount(Pageable pageable);
+
+    @Query("SELECT p FROM PromptEntity p " +
+            "JOIN FETCH p.category " +
+            "LEFT JOIN PromptLikeEntity pl ON pl.prompt = p " +
+            "AND pl.createdAt >= :start AND pl.createdAt <= :end " +
+            "WHERE p.deletedAt IS NULL " +
+            "GROUP BY p.id, p.category.id " +
+            "ORDER BY COUNT(pl) DESC, p.createdAt DESC")
+    List<PromptEntity> findDailyHotPrompts(
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end,
+            Pageable pageable
+    );
 }
 
