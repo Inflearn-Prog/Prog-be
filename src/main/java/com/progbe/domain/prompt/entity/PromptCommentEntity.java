@@ -1,5 +1,6 @@
 package com.progbe.domain.prompt.entity;
 
+import com.progbe.domain.prompt.type.PromptStatus;
 import com.progbe.domain.user.entity.UserEntity;
 import com.progbe.global.common.BaseEntity;
 import jakarta.persistence.*;
@@ -24,6 +25,10 @@ public class PromptCommentEntity extends BaseEntity {
     @Column(name = "comment", nullable = false)
     private String comment;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, columnDefinition = "VARCHAR(20) DEFAULT 'PUBLIC'")
+    private PromptStatus status = PromptStatus.PUBLIC;
+
     public PromptCommentEntity() {
     }
 
@@ -47,5 +52,13 @@ public class PromptCommentEntity extends BaseEntity {
 
     public String getComment() {
         return comment;
+    }
+
+    public PromptStatus getStatus() {
+        return status;
+    }
+
+    public void updateStatus(PromptStatus status) {
+        this.status = status;
     }
 }
