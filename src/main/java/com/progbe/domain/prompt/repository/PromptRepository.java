@@ -29,5 +29,12 @@ public interface PromptRepository extends JpaRepository<PromptEntity, Long> {
             "WHERE p.user.id IN :userIds AND p.deletedAt IS NULL " +
             "GROUP BY p.user.id")
     List<UserCountDto> countByUserIdsGrouped(@Param("userIds") List<Long> userIds);
+
+    @Query("SELECT p FROM PromptEntity p " +
+            "JOIN FETCH p.category " +
+            "WHERE p.title LIKE %:keyword% " +
+            "AND p.deletedAt IS NULL " +
+            "ORDER BY p.createdAt DESC")
+    Page<PromptEntity> findByTitleContaining(@Param("keyword") String keyword, Pageable pageable);
 }
 

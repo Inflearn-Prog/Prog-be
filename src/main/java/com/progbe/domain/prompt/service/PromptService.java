@@ -107,4 +107,16 @@ public class PromptService {
         prompt.delete();
         promptRepository.save(prompt);
     }
+
+    // 프롬프트 검색 로직 (#33)
+    public PromptListResponse searchPromptsByTitle(String keyword, Pageable pageable) {
+        Page<PromptEntity> searchResult = promptRepository.findByTitleContaining(keyword, pageable);
+
+        return new PromptListResponse(
+                searchResult.getContent().stream()
+                        .map(PromptSummaryResponse::of)
+                        .toList(),
+                searchResult.getTotalElements()
+        );
+    }
 }

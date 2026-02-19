@@ -108,5 +108,17 @@ public class PromptController {
         promptService.deletePrompt(promptId, userId);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
+
+    /**
+     * 프롬프트 제목 기준 검색 API
+     * @param keyword
+     * @param pageable
+     * @return
+     */
+    @GetMapping("/search/{keyword}")
+    public ApiResponse<PromptListResponse> searchPrompts(@PathVariable("keyword") String keyword, Pageable pageable) {
+        PromptListResponse promptListResponse = promptService.searchPromptsByTitle(keyword, pageable);
+        return ApiResponse.success(promptListResponse);
+    }
 }
 
