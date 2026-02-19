@@ -4,7 +4,9 @@ import com.progbe.domain.category.entity.CategoryEntity;
 import com.progbe.domain.category.repository.CategoryRepository;
 import com.progbe.domain.prompt.dto.*;
 import com.progbe.domain.prompt.entity.PromptEntity;
+import com.progbe.domain.prompt.entity.PromptLikeEntity;
 import com.progbe.domain.prompt.mapper.PromptMapper;
+import com.progbe.domain.prompt.repository.PromptLikeRepository;
 import com.progbe.domain.prompt.repository.PromptRepository;
 import com.progbe.domain.user.entity.UserEntity;
 import com.progbe.domain.user.repository.UserRepository;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +28,7 @@ public class PromptService {
     private final PromptRepository promptRepository;
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
+    private final PromptLikeRepository promptLikeRepository;
     private final PromptMapper promptMapper;
 
     /**
@@ -106,5 +110,27 @@ public class PromptService {
 
         prompt.delete();
         promptRepository.save(prompt);
+    }
+
+    // 좋아요 생성 (#32)
+    // 좋아요 눌렀는지를 확인하기 위해 null 값이 허용되는 Optional 전략 사용
+    public PromptLikeResponse likePrompt(Long promptId, Long userId) {
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        PromptEntity prompt = promptRepository.findById(promptId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PROMPT_NOT_FOUND));
+
+        Optional<PromptLikeEntity> existingLike = promptLikeRepository.findByUserAndPrompt(user, prompt);
+
+        if (existingLike.isPresent()) {
+            promptLikeRepository.delete(existingLike.get());
+            return PromptLikeResponse.of(LikeStatus.UNLIKE);
+        }
+
+        PromptLikeEntity newLike = PromptLikeEntity.from(user, prompt);
+
+        promptLikeRepository.save(newLike);
+        return PromptLikeResponse.of(LikeStatus.LIKE);
     }
 }

@@ -1,9 +1,6 @@
 package com.progbe.domain.prompt.controller;
 
-import com.progbe.domain.prompt.dto.PromptCreateRequest;
-import com.progbe.domain.prompt.dto.PromptListResponse;
-import com.progbe.domain.prompt.dto.PromptResponse;
-import com.progbe.domain.prompt.dto.PromptUpdateRequest;
+import com.progbe.domain.prompt.dto.*;
 import com.progbe.domain.prompt.service.PromptService;
 import com.progbe.global.common.ApiResponse;
 import jakarta.validation.Valid;
@@ -107,6 +104,19 @@ public class PromptController {
         Long userId = Long.parseLong(userDetails.getUsername());
         promptService.deletePrompt(promptId, userId);
         return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+    /**
+     * 좋아요 생성 및 취소 기능
+     * @param promptId
+     * @param userDetails
+     * @return
+     */
+    @PostMapping("/{promptId}/like")
+    public ApiResponse<PromptLikeResponse> likePrompt(@PathVariable Long promptId, @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = Long.parseLong(userDetails.getUsername());
+        PromptLikeResponse likePrompt = promptService.likePrompt(promptId, userId);
+        return ApiResponse.success(likePrompt);
     }
 }
 
