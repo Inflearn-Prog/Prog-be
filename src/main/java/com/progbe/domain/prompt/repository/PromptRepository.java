@@ -48,9 +48,17 @@ public interface PromptRepository extends JpaRepository<PromptEntity, Long> {
 
     @Query("SELECT p FROM PromptEntity p " +
             "JOIN FETCH p.category " +
-            "WHERE p.category = 'PUBLIC' " +
+            "WHERE p.deletedAt IS NULL " +
             "ORDER BY p.createdAt DESC")
     Page<PromptEntity> findPromptSortedTime(Pageable pageable);
+
+    @Query("SELECT p FROM PromptEntity p " +
+            "JOIN FETCH p.category " +
+            "LEFT JOIN PromptLikeEntity pl ON pl.prompt = p " +
+            "WHERE p.deletedAt IS NULL " +
+            "GROUP BY p.id, p.category.id " +
+            "ORDER BY COUNT(pl) DESC, p.createdAt DESC")
+    Page<PromptEntity> findPromptSortedLikeCount(Pageable pageable);
 }
 
     @Query("SELECT new PromptAdminDto(" +
