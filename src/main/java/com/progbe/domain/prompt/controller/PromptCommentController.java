@@ -6,6 +6,7 @@ import com.progbe.domain.prompt.service.PromptCommentService;
 import com.progbe.global.common.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Slice;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -69,11 +70,10 @@ public class PromptCommentController {
     }
 
     // 댓글 읽기 (전체)
-    // TODO : 슬라이싱인지 페이징인지 UI에 따라
     @GetMapping("/{promptId}")
-    public ApiResponse<List<PromptCommentResponse>> readComments(@PathVariable("promptId") Long promptId) {
+    public ApiResponse<Slice<PromptCommentResponse>> readComments(@PathVariable("promptId") Long promptId) {
         log.info("[댓글 읽기 API] : 요청");
-        List<PromptCommentResponse> result = promptCommentService.readComments(promptId);
+        Slice<PromptCommentResponse> result = promptCommentService.readComments(promptId);
         log.info("[댓글 읽기 API] : 완료");
         return ApiResponse.success(result);
     }

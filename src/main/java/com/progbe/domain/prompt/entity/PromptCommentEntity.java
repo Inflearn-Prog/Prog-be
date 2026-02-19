@@ -37,15 +37,19 @@ public class PromptCommentEntity extends BaseEntity {
     @Column(nullable = false, columnDefinition = "VARCHAR(20) DEFAULT 'PUBLIC'")
     private PromptStatus status;
 
+    @Column(name = "comment_status", nullable = false)
+    private CommentStatus status;
+
     public PromptCommentEntity() {
     }
 
-    public PromptCommentEntity(UserEntity user, PromptEntity prompt, String comment, Long parentId) {
+    public PromptCommentEntity(UserEntity user, PromptEntity prompt, String comment, Long parentId, CommentStatus status) {
         this.user = user;
         this.prompt = prompt;
         this.comment = comment;
         this.parentId = parentId;
         this.status = PromptStatus.PUBLIC;
+        this.status = status;
     }
 
     public Long getId() {
@@ -66,15 +70,20 @@ public class PromptCommentEntity extends BaseEntity {
 
     public Long getParentId() { return parentId; }
 
+    public CommentStatus getStatus() { return status; }
+
     public void setComment(String comment) {
         this.comment = comment;
     }
+
+    public void setStatus(CommentStatus status) { this.status = status; }
 
     public static PromptCommentEntity createFrom(PromptEntity prompt, UserEntity user, PromptCommentRequest request) {
         return PromptCommentEntity.builder()
                 .prompt(prompt)
                 .user(user)
                 .comment(request.comment())
+                .status(CommentStatus.PUBLIC)
                 .build();
     }
 
@@ -84,6 +93,7 @@ public class PromptCommentEntity extends BaseEntity {
                 .user(user)
                 .comment(request.comment())
                 .parentId(parentId)
+                .status(CommentStatus.PUBLIC)
                 .build();
     }
 

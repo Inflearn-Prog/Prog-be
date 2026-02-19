@@ -33,6 +33,11 @@ public enum ErrorCode {
     NOT_ADMIN(HttpStatus.FORBIDDEN, "관리자 권한이 필요합니다."),
     CANNOT_CHANGE_OWN_ROLE(HttpStatus.FORBIDDEN, "자신의 권한은 변경할 수 없습니다."),
 
+    COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "댓글을 찾을 수 없습니다."),
+    NOT_COMMENT_WRITER(HttpStatus.FORBIDDEN, "댓글 작성자가 아닙니다."),
+    REPLY_DEPTH_LIMIT(HttpStatus.BAD_REQUEST, "대댓글에는 답글을 달 수 없습니다. (1-depth 제한)"),
+    INVALID_COMMENT_PROMPT(HttpStatus.BAD_REQUEST, "해당 프롬프트의 댓글이 아닙니다."),
+
     INVALID_DATE_RANGE(HttpStatus.BAD_REQUEST, "시작일은 종료일보다 이전이어야 하며, YYYY-MM-DD 형식을 준수해야 합니다."),
     INVALID_DATE_FORMAT(HttpStatus.BAD_REQUEST, "날짜 형식이 올바르지 않습니다. YYYY-MM-DD 형식을 사용해주세요."),
     FUTURE_DATE_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "미래 날짜는 조회할 수 없습니다."),

@@ -1,6 +1,7 @@
 package com.progbe.domain.prompt.dto;
 
 import com.progbe.domain.prompt.entity.PromptCommentEntity;
+import org.springframework.data.domain.Slice;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,5 +29,9 @@ public record PromptCommentResponse(
         return commentEntityList.stream()
                 .map(PromptCommentResponse::of)
                 .toList();
+    }
+
+    public static Slice<PromptCommentResponse> sliceOf(Slice<PromptCommentEntity> commentEntitySlice) {
+        return commentEntitySlice.map(PromptCommentResponse::of);
     }
 }

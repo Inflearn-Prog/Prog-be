@@ -2,17 +2,19 @@ package com.progbe.domain.prompt.service;
 
 import com.progbe.domain.prompt.dto.PromptCommentRequest;
 import com.progbe.domain.prompt.dto.PromptCommentResponse;
+import com.progbe.domain.prompt.entity.CommentStatus;
 import com.progbe.domain.prompt.entity.PromptCommentEntity;
 import com.progbe.domain.prompt.entity.PromptEntity;
 import com.progbe.domain.prompt.repository.PromptCommentRepository;
 import com.progbe.domain.prompt.repository.PromptRepository;
 import com.progbe.domain.user.entity.UserEntity;
 import com.progbe.domain.user.repository.UserRepository;
+import com.progbe.global.error.ErrorCode;
+import com.progbe.global.error.exception.CustomException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -26,9 +28,9 @@ public class PromptCommentService {
 
 
     public PromptCommentResponse createComment(Long userId, Long promptId, PromptCommentRequest promptCommentRequest) {
-        UserEntity userEntity = userRepository.findById(userId).orElseThrow();
+        UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        PromptEntity promptEntity = promptRepository.findById(promptId).orElseThrow();
+        PromptEntity promptEntity = promptRepository.findById(promptId).orElseThrow(() -> new CustomException(ErrorCode.PROMPT_NOT_FOUND));
 
         PromptCommentEntity promptCommentEntity = PromptCommentEntity.createFrom(promptEntity, userEntity, promptCommentRequest);
 
@@ -45,11 +47,11 @@ public class PromptCommentService {
         PromptCommentEntity parentComment = promptCommentRepository.findById(commentId).orElseThrow();
 
         if (parentComment.getParentId() != null) {
-            throw new IllegalArgumentException("대댓글에는 답글을 달 수 없습니다. (1-depth 제한)");
+            throw new CustomException(ErrorCode.REPLY_DEPTH_LIMIT);
         }
 
         if (!parentComment.getPrompt().getId().equals(promptId)) {
-            throw new IllegalArgumentException("해당 프롬프트의 댓글이 아닙니다.");
+            throw new CustomException(ErrorCode.INVALID_COMMENT_PROMPT);
         }
 
         PromptCommentEntity promptCommentEntity = PromptCommentEntity.createFrom(promptEntity, userEntity, commentId, promptCommentRequest);
@@ -62,11 +64,13 @@ public class PromptCommentService {
     @Transactional
     public PromptCommentResponse modifyComment(Long userId, Long commentId, PromptCommentRequest promptCommentRequest) {
 
-        if (checkWriter(userId, commentId)) {
-            throw new IllegalArgumentException("댓글 작성자가 아닙니다.");
-        }
+        PromptCommentEntity promptCommentEntity = promptCommentRepository.findById(commentId).orElseThrow(
+                () -> new CustomException(ErrorCode.COMMENT_NOT_FOUND)
+        );
 
-        PromptCommentEntity promptCommentEntity = promptCommentRepository.findById(commentId).orElseThrow();
+        if (!promptCommentEntity.getUser().getId().equals(userId)) {
+            throw new CustomException(ErrorCode.NOT_COMMENT_WRITER);
+        }
 
         promptCommentEntity.setComment(promptCommentRequest.comment());
 
@@ -74,25 +78,18 @@ public class PromptCommentService {
     }
 
     public void deleteComment(Long userId, Long commentId) {
+        PromptCommentEntity comment = promptCommentRepository.findByIdWithUser(commentId);
 
-        if (checkWriter(userId, commentId)) {
-            throw new IllegalArgumentException("댓글 작성자가 아닙니다.");
+        if (!comment.getUser().getId().equals(userId)) {
+            throw new CustomException(ErrorCode.NOT_COMMENT_WRITER);
         }
 
-        promptCommentRepository.deleteById(commentId);
+        comment.setStatus(CommentStatus.DELETED);
     }
 
-    public List<PromptCommentResponse> readComments(Long promptId) {
-        List<PromptCommentEntity> commentEntityList = promptCommentRepository.findAllByPromptId(promptId);
+    public Slice<PromptCommentResponse> readComments(Long promptId) {
+        Slice<PromptCommentEntity> commentEntitySlice = promptCommentRepository.findAllByPromptId(promptId);
 
-        return PromptCommentResponse.listOf(commentEntityList);
-    }
-
-    private boolean checkWriter(Long userId, Long commentId) {
-        PromptCommentEntity commentEntity = promptCommentRepository.findById(commentId).orElseThrow();
-
-        Long userIdByCommentEntity = commentEntity.getUser().getId();
-
-        return !userId.equals(userIdByCommentEntity);
+        return PromptCommentResponse.sliceOf(commentEntitySlice);
     }
 }
