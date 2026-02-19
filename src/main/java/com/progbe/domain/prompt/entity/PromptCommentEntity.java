@@ -35,21 +35,22 @@ public class PromptCommentEntity extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, columnDefinition = "VARCHAR(20) DEFAULT 'PUBLIC'")
-    private PromptStatus status;
+    private PromptStatus promptStatus;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "comment_status", nullable = false)
-    private CommentStatus status;
+    private CommentStatus commentStatus;
 
     public PromptCommentEntity() {
     }
 
-    public PromptCommentEntity(UserEntity user, PromptEntity prompt, String comment, Long parentId, CommentStatus status) {
+    public PromptCommentEntity(UserEntity user, PromptEntity prompt, String comment, Long parentId, CommentStatus commentStatus) {
         this.user = user;
         this.prompt = prompt;
         this.comment = comment;
         this.parentId = parentId;
-        this.status = PromptStatus.PUBLIC;
-        this.status = status;
+        this.promptStatus = PromptStatus.PUBLIC;
+        this.commentStatus = commentStatus;
     }
 
     public Long getId() {
@@ -70,20 +71,20 @@ public class PromptCommentEntity extends BaseEntity {
 
     public Long getParentId() { return parentId; }
 
-    public CommentStatus getStatus() { return status; }
+    public CommentStatus getCommentStatus() { return commentStatus; }
 
     public void setComment(String comment) {
         this.comment = comment;
     }
 
-    public void setStatus(CommentStatus status) { this.status = status; }
+    public void setCommentStatus(CommentStatus status) { this.commentStatus = status; }
 
     public static PromptCommentEntity createFrom(PromptEntity prompt, UserEntity user, PromptCommentRequest request) {
         return PromptCommentEntity.builder()
                 .prompt(prompt)
                 .user(user)
                 .comment(request.comment())
-                .status(CommentStatus.PUBLIC)
+                .commentStatus(CommentStatus.PUBLIC)
                 .build();
     }
 
@@ -93,15 +94,15 @@ public class PromptCommentEntity extends BaseEntity {
                 .user(user)
                 .comment(request.comment())
                 .parentId(parentId)
-                .status(CommentStatus.PUBLIC)
+                .commentStatus(CommentStatus.PUBLIC)
                 .build();
     }
 
-    public PromptStatus getStatus() {
-        return status;
+    public PromptStatus getPromptStatus() {
+        return promptStatus;
     }
 
-    public void updateStatus(PromptStatus status) {
-        this.status = status;
+    public void updatePromptStatus(PromptStatus status) {
+        this.promptStatus = status;
     }
 }
