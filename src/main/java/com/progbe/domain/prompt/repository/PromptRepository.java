@@ -59,6 +59,19 @@ public interface PromptRepository extends JpaRepository<PromptEntity, Long> {
             "GROUP BY p.id, p.category.id " +
             "ORDER BY COUNT(pl) DESC, p.createdAt DESC")
     Page<PromptEntity> findPromptSortedLikeCount(Pageable pageable);
+
+    @Query("SELECT p FROM PromptEntity p " +
+            "JOIN FETCH p.category " +
+            "LEFT JOIN PromptLikeEntity pl ON pl.prompt = p " +
+            "AND pl.createdAt >= :start AND pl.createdAt <= :end " +
+            "WHERE p.deletedAt IS NULL " +
+            "GROUP BY p.id, p.category.id " +
+            "ORDER BY COUNT(pl) DESC, p.createdAt DESC")
+    List<PromptEntity> findDailyHotPrompts(
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end,
+            Pageable pageable
+    );
 }
 
     @Query("SELECT new PromptAdminDto(" +

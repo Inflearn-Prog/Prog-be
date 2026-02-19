@@ -1,9 +1,6 @@
 package com.progbe.domain.prompt.controller;
 
-import com.progbe.domain.prompt.dto.PromptCreateRequest;
-import com.progbe.domain.prompt.dto.PromptListResponse;
-import com.progbe.domain.prompt.dto.PromptResponse;
-import com.progbe.domain.prompt.dto.PromptUpdateRequest;
+import com.progbe.domain.prompt.dto.*;
 import com.progbe.domain.prompt.service.PromptService;
 import com.progbe.global.common.ApiResponse;
 import jakarta.validation.Valid;
@@ -16,6 +13,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.parameters.P;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/prompts")
@@ -132,6 +131,16 @@ public class PromptController {
     public ApiResponse<PromptListResponse> likePromptDesc(
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         PromptListResponse prompts = promptService.getPromptsSortedLikeCount(pageable);
+        return ApiResponse.success(prompts);
+    }
+
+    /**
+     * 금일 가장 많은 좋아요순 API
+     * @return
+     */
+    @GetMapping("/today-hot")
+    public ApiResponse<List<PromptSummaryResponse>> getTodayHotPrompts() {
+        List<PromptSummaryResponse> prompts = promptService.getDailyHotPrompts();
         return ApiResponse.success(prompts);
     }
 
