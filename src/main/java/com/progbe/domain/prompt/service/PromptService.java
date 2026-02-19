@@ -1,5 +1,6 @@
 package com.progbe.domain.prompt.service;
 
+import com.progbe.domain.category.dto.CategoryResponse;
 import com.progbe.domain.category.entity.CategoryEntity;
 import com.progbe.domain.category.repository.CategoryRepository;
 import com.progbe.domain.prompt.dto.*;
@@ -106,5 +107,25 @@ public class PromptService {
 
         prompt.delete();
         promptRepository.save(prompt);
+    }
+
+    // 최신순 프롬프트 띄어주기 로직 (#31)
+    public PromptListResponse getPromptsSortedTime(Pageable pageable) {
+        Page<PromptEntity> promptEntities = promptRepository.findPromptSortedTime(pageable);
+
+        List<PromptSummaryResponse> promptList = promptEntities.getContent().stream()
+                .map(entity -> new PromptSummaryResponse(
+                        entity.getId(),
+                        promptMapper.toCategoryResponse(entity.getCategory()),
+                        entity.getTitle(),
+                        entity.getCreatedAt(),
+                        entity.getUpdatedAt()
+                ))
+                .toList();
+
+        return new PromptListResponse(
+                promptList,
+                promptEntities.getTotalElements()
+        );
     }
 }

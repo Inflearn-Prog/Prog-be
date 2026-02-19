@@ -9,6 +9,7 @@ import com.progbe.global.common.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -107,6 +108,18 @@ public class PromptController {
         Long userId = Long.parseLong(userDetails.getUsername());
         promptService.deletePrompt(promptId, userId);
         return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+    /**
+     * 프롬프트 최신순 API
+     * @param pageable
+     * @return
+     */
+    @GetMapping("/createDesc")
+    public ApiResponse<PromptListResponse> createPromptDesc(
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        PromptListResponse prompts = promptService.getPromptsSortedTime(pageable);
+        return ApiResponse.success(prompts);
     }
 }
 

@@ -46,6 +46,13 @@ public interface PromptRepository extends JpaRepository<PromptEntity, Long> {
     @Query("UPDATE PromptEntity p SET p.deletedAt = :deletedAt, p.status = :status WHERE p.id IN :promptIds")
     int bulkSoftDelete(@Param("promptIds") List<Long> promptIds, @Param("deletedAt") LocalDateTime deletedAt, @Param("status") PromptStatus status);
 
+    @Query("SELECT p FROM PromptEntity p " +
+            "JOIN FETCH p.category " +
+            "WHERE p.category = 'PUBLIC' " +
+            "ORDER BY p.createdAt DESC")
+    Page<PromptEntity> findPromptSortedTime(Pageable pageable);
+}
+
     @Query("SELECT new PromptAdminDto(" +
             "p.id, p.title, u.nickname, c.name, p.status, p.createdAt) " +
             "FROM PromptEntity p " +
