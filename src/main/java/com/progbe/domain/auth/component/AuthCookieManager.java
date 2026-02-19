@@ -1,5 +1,6 @@
 package com.progbe.domain.auth.component;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
@@ -7,15 +8,34 @@ import org.springframework.stereotype.Component;
 public class AuthCookieManager {
 
     private static final String REFRESH_TOKEN_COOKIE_NAME = "refresh_token";
-    private static final long REFRESH_TOKEN_EXPIRATION = 14 * 24 * 60 * 60;
+
+    @Value("${jwt.refresh-expiration}")
+    private long refreshTokenValidityInMilliseconds;
+
+    @Value("${app.cookie.secure:false}")
+    private boolean cookieSecure;
+
+    @Value("${app.cookie.same-site:Lax}")
+    private String cookieSameSite;
 
     public ResponseCookie createRefreshTokenCookie(String refreshToken) {
+        long maxAgeSeconds = refreshTokenValidityInMilliseconds / 1000;
         return ResponseCookie.from(REFRESH_TOKEN_COOKIE_NAME, refreshToken)
                 .httpOnly(true)
-                .secure(false) // TODO : SSL 적용 후 true로 변경 필요
+                .secure(cookieSecure)
                 .path("/")
-                .maxAge(REFRESH_TOKEN_EXPIRATION)
-                .sameSite("None")
+                .maxAge(maxAgeSeconds)
+                .sameSite(cookieSameSite)
+                .build();
+    }
+
+    public ResponseCookie createDeleteCookie() {
+        return ResponseCookie.from(REFRESH_TOKEN_COOKIE_NAME, "")
+                .httpOnly(true)
+                .secure(cookieSecure)
+                .path("/")
+                .maxAge(0)
+                .sameSite(cookieSameSite)
                 .build();
     }
 }
