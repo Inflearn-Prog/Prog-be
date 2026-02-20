@@ -84,7 +84,7 @@ public class PromptCommentService {
             throw new CustomException(ErrorCode.NOT_COMMENT_WRITER);
         }
 
-        comment.setStatus(CommentStatus.DELETED);
+        comment.softDelete();
     }
 
     public Slice<PromptCommentResponse> readComments(Long promptId) {

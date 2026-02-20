@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,7 +34,9 @@ public interface PromptCommentRepository extends JpaRepository<PromptCommentEnti
 
     @Query("SELECT c FROM PromptCommentEntity c " +
             "JOIN FETCH c.user " +
-            "WHERE c.prompt.id = :promptId " +
+            "WHERE c.prompt.id = :promptId AND c.deletedAt IS NULL " +
             "ORDER BY COALESCE(c.parentId, c.id) ASC, c.createdAt ASC")
     Slice<PromptCommentEntity> findAllByPromptId(Long promptId);
+
+    List<PromptCommentEntity> findAllByDeletedAtBefore(LocalDateTime dateTime);
 }

@@ -8,6 +8,8 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "comment")
 @Builder
@@ -78,6 +80,11 @@ public class PromptCommentEntity extends BaseEntity {
     }
 
     public void setCommentStatus(CommentStatus status) { this.commentStatus = status; }
+
+    public void softDelete() {
+        this.status = CommentStatus.DELETED;
+        this.deletedAt = LocalDateTime.now();
+    }
 
     public static PromptCommentEntity createFrom(PromptEntity prompt, UserEntity user, PromptCommentRequest request) {
         return PromptCommentEntity.builder()
