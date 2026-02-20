@@ -82,7 +82,7 @@ public class PromptCommentEntity extends BaseEntity {
     public void setCommentStatus(CommentStatus status) { this.commentStatus = status; }
 
     public void softDelete() {
-        this.status = CommentStatus.DELETED;
+        this.commentStatus = CommentStatus.DELETED;
         this.deletedAt = LocalDateTime.now();
     }
 
