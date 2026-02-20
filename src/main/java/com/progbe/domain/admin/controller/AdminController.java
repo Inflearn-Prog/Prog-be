@@ -1,11 +1,6 @@
 package com.progbe.domain.admin.controller;
 
-import com.progbe.domain.admin.dto.AdminPromptRequest;
-import com.progbe.domain.admin.dto.AdminPromptResponse;
-import com.progbe.domain.admin.dto.AdminRequest;
-import com.progbe.domain.admin.dto.AdminResponse;
-import com.progbe.domain.admin.dto.AdminUserRequest;
-import com.progbe.domain.admin.dto.AdminUserResponse;
+import com.progbe.domain.admin.dto.*;
 import com.progbe.domain.admin.service.AdminPromptService;
 import com.progbe.domain.admin.service.AdminService;
 import com.progbe.domain.admin.service.AdminUserService;

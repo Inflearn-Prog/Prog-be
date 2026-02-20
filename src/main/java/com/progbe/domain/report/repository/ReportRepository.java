@@ -20,7 +20,7 @@ public interface ReportRepository extends JpaRepository<ReportEntity, Long> {
            "WHERE r.reporter.id = :reporterId " +
            "AND r.targetType = :targetType " +
            "AND r.targetId = :targetId " +
-           "AND r.status = com.progbe.domain.report.type.ReportStatus.PENDING")
+           "AND r.status = ReportStatus.PENDING")
     boolean existsPendingReport(@Param("reporterId") Long reporterId, 
                                 @Param("targetType") TargetType targetType, 
                                 @Param("targetId") Long targetId);
@@ -30,15 +30,15 @@ public interface ReportRepository extends JpaRepository<ReportEntity, Long> {
            "ORDER BY r.createdAt DESC")
     Page<ReportEntity> findByStatusOrderByCreatedAtDesc(@Param("status") ReportStatus status, Pageable pageable);
 
-    @Query("SELECT new com.progbe.domain.report.dto.PendingReportDto(" +
+    @Query("SELECT new PendingReportDto(" +
            "r.id, r.createdAt, r.reason, " +
            "COALESCE(p.title, '(삭제된 게시글)'), " +
            "u.nickname, " +
-           "CASE WHEN r.reason = com.progbe.domain.report.type.ReportReason.OTHER THEN r.reasonDetail ELSE '' END, " +
+           "CASE WHEN r.reason = ReportReason.OTHER THEN r.reasonDetail ELSE '' END, " +
            "r.status) " +
            "FROM ReportEntity r " +
            "JOIN r.reporter u " +
-           "LEFT JOIN PromptEntity p ON r.targetId = p.id AND r.targetType = com.progbe.domain.report.type.TargetType.PROMPT " +
+           "LEFT JOIN PromptEntity p ON r.targetId = p.id AND r.targetType = TargetType.PROMPT " +
            "WHERE r.status = :status " +
            "ORDER BY r.createdAt DESC")
     Page<PendingReportDto> findPendingReportsAsDto(@Param("status") ReportStatus status, Pageable pageable);

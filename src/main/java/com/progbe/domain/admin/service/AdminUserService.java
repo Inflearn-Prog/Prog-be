@@ -71,15 +71,11 @@ public class AdminUserService {
             Long currentUserId,
             AdminUserRequest.BulkRoleUpdateRequest request
     ) {
-        List<Long> distinctUserIds = request.userIds().stream()
-                .distinct()
-                .toList();
+        List<Long> validatedUserIds = validateAndGetDistinctUserIds(request.userIds());
 
-        if (distinctUserIds.contains(currentUserId)) {
+        if (validatedUserIds.contains(currentUserId)) {
             throw new CustomException(ErrorCode.CANNOT_CHANGE_OWN_ROLE);
         }
-
-        List<Long> validatedUserIds = validateAndGetDistinctUserIds(request.userIds());
 
         int updatedCount = userRepository.bulkUpdateRole(validatedUserIds, request.role());
 

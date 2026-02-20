@@ -10,17 +10,12 @@ public class StatisticComponent {
     }
 
     public StatisticResult calculateRate(long current, long previous) {
-
-        if (current < 0) {
-            return new StatisticResult(0.0, MetricCalculationStatus.INVALID_INPUT);
-        }
-
-        if (previous < 0) {
-            return new StatisticResult(0.0, MetricCalculationStatus.INVALID_INPUT);
+        if (current < 0 || previous < 0) {
+            return new StatisticResult(0, MetricCalculationStatus.INVALID_INPUT);
         }
 
         if (previous == 0) {
-            double rate = current > 0 ? 100.0 : 0.0;
+            double rate = current > 0 ? 100 : 0;
             return new StatisticResult(rate, MetricCalculationStatus.ZERO_PREVIOUS);
         }
 
@@ -29,6 +24,6 @@ public class StatisticComponent {
     }
 
     public double roundToFirstDecimal(double value) {
-        return Math.round(value * 10.0) / 10.0;
+        return Math.round(value * 10) / 10.0;
     }
 }
