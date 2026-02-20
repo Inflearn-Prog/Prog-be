@@ -49,17 +49,10 @@ public class AdminPromptService {
 
     @Transactional
     public AdminPromptResponse.BulkUpdateResponse bulkUpdatePrompts(AdminPromptRequest.BulkUpdateRequest request) {
-        List<Long> distinctPromptIds = request.promptIds().stream()
-                .distinct()
-                .toList();
+        List<Long> existingPromptIds = validateAndGetDistinctPromptIds(request.promptIds());
 
-        if (distinctPromptIds.isEmpty()) {
-            return adminPromptMapper.toBulkUpdateResponse(0);
-        }
-
-        List<Long> existingPromptIds = promptRepository.findExistingPromptIds(distinctPromptIds);
         if (existingPromptIds.isEmpty()) {
-            throw new CustomException(ErrorCode.PROMPTS_NOT_FOUND);
+            return adminPromptMapper.toBulkUpdateResponse(0);
         }
 
         AdminPromptRequest.UpdateFields updateFields = request.updateFields();
@@ -82,17 +75,10 @@ public class AdminPromptService {
 
     @Transactional
     public AdminPromptResponse.BulkDeleteResponse bulkDeletePrompts(AdminPromptRequest.BulkDeleteRequest request) {
-        List<Long> distinctPromptIds = request.promptIds().stream()
-                .distinct()
-                .toList();
+        List<Long> existingPromptIds = validateAndGetDistinctPromptIds(request.promptIds());
 
-        if (distinctPromptIds.isEmpty()) {
-            return adminPromptMapper.toBulkDeleteResponse(0);
-        }
-
-        List<Long> existingPromptIds = promptRepository.findExistingPromptIds(distinctPromptIds);
         if (existingPromptIds.isEmpty()) {
-            throw new CustomException(ErrorCode.PROMPTS_NOT_FOUND);
+            return adminPromptMapper.toBulkDeleteResponse(0);
         }
 
         LocalDateTime now = LocalDateTime.now();
@@ -103,5 +89,22 @@ public class AdminPromptService {
         );
 
         return adminPromptMapper.toBulkDeleteResponse(deletedCount);
+    }
+
+    private List<Long> validateAndGetDistinctPromptIds(List<Long> promptIds) {
+        List<Long> distinctPromptIds = promptIds.stream()
+                .distinct()
+                .toList();
+
+        if (distinctPromptIds.isEmpty()) {
+            return List.of();
+        }
+
+        List<Long> existingPromptIds = promptRepository.findExistingPromptIds(distinctPromptIds);
+        if (existingPromptIds.isEmpty()) {
+            throw new CustomException(ErrorCode.PROMPTS_NOT_FOUND);
+        }
+
+        return existingPromptIds;
     }
 }

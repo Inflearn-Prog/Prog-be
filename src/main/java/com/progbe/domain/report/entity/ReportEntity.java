@@ -4,14 +4,12 @@ import com.progbe.domain.report.type.ReportReason;
 import com.progbe.domain.report.type.ReportStatus;
 import com.progbe.domain.report.type.TargetType;
 import com.progbe.domain.user.entity.UserEntity;
+import com.progbe.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
@@ -27,8 +25,7 @@ import java.time.LocalDateTime;
 )
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@EntityListeners(AuditingEntityListener.class)
-public class ReportEntity {
+public class ReportEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -59,14 +56,6 @@ public class ReportEntity {
 
     @Column(name = "admin_remark", length = 1000)
     private String adminRemark;
-
-    @CreatedDate
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
-
-    @LastModifiedDate
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
 
     @Column(name = "processed_at")
     private LocalDateTime processedAt;

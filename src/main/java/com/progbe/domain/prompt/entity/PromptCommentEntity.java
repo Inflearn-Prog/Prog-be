@@ -27,7 +27,7 @@ public class PromptCommentEntity extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, columnDefinition = "VARCHAR(20) DEFAULT 'PUBLIC'")
-    private PromptStatus status = PromptStatus.PUBLIC;
+    private PromptStatus status;
 
     public PromptCommentEntity() {
     }
@@ -36,6 +36,7 @@ public class PromptCommentEntity extends BaseEntity {
         this.user = user;
         this.prompt = prompt;
         this.comment = comment;
+        this.status = PromptStatus.PUBLIC;
     }
 
     public Long getId() {
