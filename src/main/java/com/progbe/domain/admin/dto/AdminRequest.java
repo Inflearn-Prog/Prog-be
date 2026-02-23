@@ -2,13 +2,11 @@ package com.progbe.domain.admin.dto;
 
 import com.progbe.global.error.ErrorCode;
 import com.progbe.global.error.exception.CustomException;
-import lombok.Getter;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
-@Getter
 public class AdminRequest {
 
     public record StatsSummaryRequest(@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,

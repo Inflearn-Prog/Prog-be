@@ -7,8 +7,13 @@ public record CategoryResponse(
         String name,
         String description
 ) {
-    public static CategoryResponse from(CategoryEntity category) {
-        return new CategoryResponse(category.getId(), category.getName(), category.getDescription());
+
+    public static CategoryResponse from(CategoryEntity entity) {
+        return new CategoryResponse(
+                entity.getId(),
+                entity.getName(),
+                entity.getDescription()
+        );
     }
 }
 
