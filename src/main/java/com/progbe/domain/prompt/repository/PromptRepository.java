@@ -62,6 +62,14 @@ public interface PromptRepository extends JpaRepository<PromptEntity, Long> {
 
     @Query("SELECT p FROM PromptEntity p " +
             "JOIN FETCH p.category " +
+            "WHERE p.title LIKE %:keyword% " +
+            "AND p.deletedAt IS NULL " +
+            "ORDER BY p.createdAt DESC")
+    Page<PromptEntity> findByTitleContaining(@Param("keyword") String keyword, Pageable pageable);
+
+
+    @Query("SELECT p FROM PromptEntity p " +
+            "JOIN FETCH p.category " +
             "LEFT JOIN PromptLikeEntity pl ON pl.prompt = p " +
             "AND pl.createdAt >= :start AND pl.createdAt <= :end " +
             "WHERE p.deletedAt IS NULL " +
