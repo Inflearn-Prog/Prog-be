@@ -46,35 +46,7 @@ public interface PromptRepository extends JpaRepository<PromptEntity, Long> {
     @Query("UPDATE PromptEntity p SET p.deletedAt = :deletedAt, p.status = :status WHERE p.id IN :promptIds")
     int bulkSoftDelete(@Param("promptIds") List<Long> promptIds, @Param("deletedAt") LocalDateTime deletedAt, @Param("status") PromptStatus status);
 
-    @Query("SELECT p FROM PromptEntity p " +
-            "JOIN FETCH p.category " +
-            "WHERE p.deletedAt IS NULL " +
-            "ORDER BY p.createdAt DESC")
-    Page<PromptEntity> findPromptSortedTime(Pageable pageable);
-
-    @Query("SELECT p FROM PromptEntity p " +
-            "JOIN FETCH p.category " +
-            "LEFT JOIN PromptLikeEntity pl ON pl.prompt = p " +
-            "WHERE p.deletedAt IS NULL " +
-            "GROUP BY p.id, p.category.id " +
-            "ORDER BY COUNT(pl) DESC, p.createdAt DESC")
-    Page<PromptEntity> findPromptSortedLikeCount(Pageable pageable);
-
-    @Query("SELECT p FROM PromptEntity p " +
-            "JOIN FETCH p.category " +
-            "LEFT JOIN PromptLikeEntity pl ON pl.prompt = p " +
-            "AND pl.createdAt >= :start AND pl.createdAt <= :end " +
-            "WHERE p.deletedAt IS NULL " +
-            "GROUP BY p.id, p.category.id " +
-            "ORDER BY COUNT(pl) DESC, p.createdAt DESC")
-    List<PromptEntity> findDailyHotPrompts(
-            @Param("start") LocalDateTime start,
-            @Param("end") LocalDateTime end,
-            Pageable pageable
-    );
-}
-
-    @Query("SELECT new PromptAdminDto(" +
+    @Query("SELECT new com.progbe.domain.admin.dto.PromptAdminDto(" +
             "p.id, p.title, u.nickname, c.name, p.status, p.createdAt) " +
             "FROM PromptEntity p " +
             "JOIN p.user u " +
