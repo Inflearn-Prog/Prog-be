@@ -10,7 +10,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.parameters.P;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
@@ -144,5 +143,18 @@ public class PromptController {
         return ApiResponse.success(prompts);
     }
 
+
+    /**
+     * 좋아요 생성 및 취소 기능
+     * @param promptId
+     * @param userDetails
+     * @return
+     */
+    @PostMapping("/{promptId}/like")
+    public ApiResponse<PromptLikeResponse> likePrompt(@PathVariable Long promptId, @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = Long.parseLong(userDetails.getUsername());
+        PromptLikeResponse likePrompt = promptService.likePrompt(promptId, userId);
+        return ApiResponse.success(likePrompt);
+    }
 }
 
