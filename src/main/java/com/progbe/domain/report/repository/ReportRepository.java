@@ -30,7 +30,7 @@ public interface ReportRepository extends JpaRepository<ReportEntity, Long> {
            "ORDER BY r.createdAt DESC")
     Page<ReportEntity> findByStatusOrderByCreatedAtDesc(@Param("status") ReportStatus status, Pageable pageable);
 
-    @Query("SELECT new PendingReportDto(" +
+    @Query("SELECT new com.progbe.domain.report.dto.PendingReportDto(" +
            "r.id, r.createdAt, r.reason, " +
            "COALESCE(p.title, '(삭제된 게시글)'), " +
            "u.nickname, " +
