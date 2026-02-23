@@ -6,11 +6,14 @@ import com.progbe.global.common.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/prompts")
@@ -105,6 +108,41 @@ public class PromptController {
         promptService.deletePrompt(promptId, userId);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
+
+    /**
+     * 프롬프트 최신순 API
+     * @param pageable
+     * @return
+     */
+    @GetMapping("/createDesc")
+    public ApiResponse<PromptListResponse> createPromptDesc(
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        PromptListResponse prompts = promptService.getPromptsSortedTime(pageable);
+        return ApiResponse.success(prompts);
+    }
+
+    /**
+     * 프롬프트 좋아요순 API
+     * @param pageable
+     * @return
+     */
+    @GetMapping("/likeDesc")
+    public ApiResponse<PromptListResponse> likePromptDesc(
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        PromptListResponse prompts = promptService.getPromptsSortedLikeCount(pageable);
+        return ApiResponse.success(prompts);
+    }
+
+    /**
+     * 금일 가장 많은 좋아요순 API
+     * @return
+     */
+    @GetMapping("/today-hot")
+    public ApiResponse<List<PromptSummaryResponse>> getTodayHotPrompts() {
+        List<PromptSummaryResponse> prompts = promptService.getDailyHotPrompts();
+        return ApiResponse.success(prompts);
+    }
+
 
     /**
      * 좋아요 생성 및 취소 기능
