@@ -44,6 +44,10 @@ public enum ErrorCode {
     DATE_RANGE_EXCEEDED(HttpStatus.BAD_REQUEST, "조회 가능한 최대 기간은 30일입니다."),
 
     INVALID_CATEGORY(HttpStatus.BAD_REQUEST, "유효하지 않은 카테고리 정보가 포함되어 있습니다."),
+    CATEGORY_NOT_EMPTY(HttpStatus.INTERNAL_SERVER_ERROR, "게시글이 존재하거나 하위 카테고리가 있는 경우 삭제할 수 없습니다."),
+    CATEGORY_NAME_DUPLICATE(HttpStatus.BAD_REQUEST, "이미 존재하는 카테고리 이름입니다."),
+    INVALID_PARENT_CATEGORY(HttpStatus.BAD_REQUEST, "유효하지 않은 부모 카테고리입니다."),
+    CATEGORY_DEPTH_EXCEEDED(HttpStatus.BAD_REQUEST, "카테고리는 최대 2단계까지만 생성할 수 있습니다."),
     PROMPTS_NOT_FOUND(HttpStatus.NOT_FOUND, "요청한 프롬프트 ID 중 존재하는 게시글이 없습니다."),
 
     CANNOT_REPORT_SELF(HttpStatus.BAD_REQUEST, "자신의 컨텐츠를 신고할 수 없습니다."),

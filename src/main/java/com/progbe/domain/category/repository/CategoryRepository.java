@@ -15,5 +15,11 @@ public interface CategoryRepository extends JpaRepository<CategoryEntity, Long> 
 
     @Query("SELECT c FROM CategoryEntity c WHERE c.deletedAt IS NULL ORDER BY c.id ASC")
     List<CategoryEntity> findAllByNotDeleted();
+
+    @Query("SELECT COUNT(c) > 0 FROM CategoryEntity c WHERE c.parent.id = :parentId AND c.deletedAt IS NULL")
+    boolean existsChildrenByParentId(@Param("parentId") Long parentId);
+
+    @Query("SELECT c FROM CategoryEntity c WHERE c.name = :name AND c.deletedAt IS NULL")
+    Optional<CategoryEntity> findByNameAndNotDeleted(@Param("name") String name);
 }
 

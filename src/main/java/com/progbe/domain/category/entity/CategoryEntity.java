@@ -1,15 +1,14 @@
 package com.progbe.domain.category.entity;
 
+import com.progbe.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(
@@ -19,12 +18,14 @@ import java.time.LocalDateTime;
                         name = "uk_category_name",
                         columnNames = {"name"}
                 )
+        },
+        indexes = {
+                @Index(name = "idx_category_parent_id", columnList = "parent_id")
         }
 )
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@EntityListeners(AuditingEntityListener.class)
-public class CategoryEntity {
+public class CategoryEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,35 +38,35 @@ public class CategoryEntity {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @CreatedDate
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
+    private CategoryEntity parent;
 
-    @LastModifiedDate
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
+    @OneToMany(mappedBy = "parent")
+    private List<CategoryEntity> children = new ArrayList<>();
 
     @Builder
-    public CategoryEntity(String name, String description) {
+    public CategoryEntity(String name, String description, CategoryEntity parent) {
         this.name = name;
         this.description = description;
+        this.parent = parent;
     }
 
     // 어드민에서 카테고리 관리 고려
-    public void update(String name, String description) {
+    public void update(String name, String description, CategoryEntity parent) {
         if (name != null) {
             this.name = name;
         }
         if (description != null) {
             this.description = description;
         }
+        if (parent != null) {
+            this.parent = parent;
+        }
     }
 
-    public void delete() {
-        this.deletedAt = LocalDateTime.now();
+    public boolean isParentCategory() {
+        return parent == null;
     }
 }
 

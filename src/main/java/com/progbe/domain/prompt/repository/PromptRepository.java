@@ -100,4 +100,7 @@ public interface PromptRepository extends JpaRepository<PromptEntity, Long> {
 
     @Query("SELECT p.id FROM PromptEntity p WHERE p.id IN :promptIds")
     List<Long> findExistingPromptIds(@Param("promptIds") List<Long> promptIds);
+
+    @Query("SELECT COUNT(p) > 0 FROM PromptEntity p WHERE p.category.id = :categoryId AND p.deletedAt IS NULL")
+    boolean existsByCategoryIdAndNotDeleted(@Param("categoryId") Long categoryId);
 }
