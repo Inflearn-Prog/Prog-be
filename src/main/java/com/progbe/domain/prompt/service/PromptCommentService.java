@@ -2,7 +2,6 @@ package com.progbe.domain.prompt.service;
 
 import com.progbe.domain.prompt.dto.PromptCommentRequest;
 import com.progbe.domain.prompt.dto.PromptCommentResponse;
-import com.progbe.domain.prompt.entity.CommentStatus;
 import com.progbe.domain.prompt.entity.PromptCommentEntity;
 import com.progbe.domain.prompt.entity.PromptEntity;
 import com.progbe.domain.prompt.repository.PromptCommentRepository;
