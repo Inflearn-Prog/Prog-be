@@ -25,6 +25,9 @@ public enum ErrorCode {
     NICKNAME_CHANGE_TOO_FREQUENT(HttpStatus.BAD_REQUEST, "닉네임은 24시간에 한 번만 변경할 수 있습니다."),
     INVALID_CAREER_YEAR(HttpStatus.BAD_REQUEST, "유효하지 않은 경력 연차 값입니다."),
 
+    TERMS_AGREEMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "동의한 약관을 찾을 수 없습니다."),
+    TERMS_ALREADY_WITHDRAWN(HttpStatus.NOT_FOUND, "이미 철회 요청을 보낸 약관입니다."),
+
     QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 문의사항입니다."),
     ANSWER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 답변입니다."),
 
