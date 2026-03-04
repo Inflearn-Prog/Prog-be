@@ -1,7 +1,6 @@
 package com.progbe.domain.user.controller;
 
-import com.progbe.domain.terms.dto.TermsAgreementRequest;
-import com.progbe.domain.terms.dto.TermsAgreementResponse;
+import com.progbe.domain.terms.dto.*;
 import com.progbe.domain.terms.service.TermsService;
 import com.progbe.domain.user.dto.*;
 import com.progbe.domain.user.service.UserProfileService;
@@ -24,11 +23,30 @@ public class UserController {
 
     @PostMapping("/terms-agreement")
     public ApiResponse<TermsAgreementResponse> agreeTerms(
-            @RequestBody TermsAgreementRequest request,
+            @Valid @RequestBody TermsAgreementRequest request,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
         Long userId = Long.parseLong(userDetails.getUsername());
         TermsAgreementResponse response = termsService.processAgreement(userId, request);
+        return ApiResponse.success(response);
+    }
+
+    @DeleteMapping("/me/terms-agreements")
+    public ApiResponse<TermsWithdrawalResponse> withdrawTermsAgreement(
+            @Valid @RequestBody TermsWithdrawalRequest request,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        Long userId = Long.parseLong(userDetails.getUsername());
+        TermsWithdrawalResponse response = termsService.withdrawTermsAgreement(userId, request);
+        return ApiResponse.success(response);
+    }
+
+    @GetMapping("/me/terms-agreements")
+    public ApiResponse<UserAgreedTermsResponse> getUserAgreedTerms(
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        Long userId = Long.parseLong(userDetails.getUsername());
+        UserAgreedTermsResponse response = termsService.getUserAgreedTerms(userId);
         return ApiResponse.success(response);
     }
 

@@ -15,11 +15,6 @@ import java.util.Optional;
 
 @Repository
 public interface PromptCommentRepository extends JpaRepository<PromptCommentEntity, Long> {
-    @Query("SELECT c FROM PromptCommentEntity c " +
-            "JOIN FETCH c.user " +
-            "WHERE c.prompt.id = :promptId " +
-            "ORDER BY COALESCE(c.parentId, c.id) ASC, c.createdAt ASC")
-    List<PromptCommentEntity> findAllByPromptId(Long promptId);
 
     @Query("SELECT COUNT(c) FROM PromptCommentEntity c WHERE c.user.id = :userId AND c.deletedAt IS NULL")
     long countByUserIdAndNotDeleted(@Param("userId") Long userId);
