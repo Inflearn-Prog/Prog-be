@@ -2,7 +2,6 @@ package com.progbe.domain.prompt.repository;
 
 import com.progbe.domain.admin.dto.UserCountDto;
 import com.progbe.domain.prompt.entity.PromptCommentEntity;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -11,7 +10,6 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface PromptCommentRepository extends JpaRepository<PromptCommentEntity, Long> {
@@ -36,7 +34,7 @@ public interface PromptCommentRepository extends JpaRepository<PromptCommentEnti
             "JOIN FETCH c.user " +
             "WHERE c.prompt.id = :promptId AND c.deletedAt IS NULL " +
             "ORDER BY COALESCE(c.parentId, c.id) ASC, c.createdAt ASC")
-    Slice<PromptCommentEntity> findAllByPromptId(Long promptId);
+    Slice<PromptCommentEntity> findSliceAllByPromptId(Long promptId);
 
     List<PromptCommentEntity> findAllByDeletedAtBefore(LocalDateTime dateTime);
 }

@@ -88,7 +88,7 @@ public class PromptCommentService {
     }
 
     public Slice<PromptCommentResponse> readComments(Long promptId) {
-        Slice<PromptCommentEntity> commentEntitySlice = promptCommentRepository.findAllByPromptId(promptId);
+        Slice<PromptCommentEntity> commentEntitySlice = promptCommentRepository.findSliceAllByPromptId(promptId);
 
         return PromptCommentResponse.sliceOf(commentEntitySlice);
     }
