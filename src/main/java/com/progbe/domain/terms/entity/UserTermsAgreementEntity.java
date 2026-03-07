@@ -44,12 +44,26 @@ public class UserTermsAgreementEntity extends BaseEntity {
     @Column(name = "agreed_at")
     private LocalDateTime agreedAt;
 
+    @Column(name = "withdrawn_at")
+    private LocalDateTime withdrawnAt;
+
     @Builder
     public UserTermsAgreementEntity(UserEntity user, TermsEntity terms, LocalDateTime version, Boolean isAgreed) {
         this.user = user;
         this.terms = terms;
         this.version = version;
         this.isAgreed = isAgreed;
+        this.agreedAt = LocalDateTime.now();
+    }
+
+    public void withdraw() {
+        this.isAgreed = false;
+        this.withdrawnAt = LocalDateTime.now();
+    }
+
+    public void reAgree() {
+        this.isAgreed = true;
+        this.withdrawnAt = null;
         this.agreedAt = LocalDateTime.now();
     }
 }

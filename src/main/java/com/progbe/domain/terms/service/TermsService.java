@@ -1,9 +1,6 @@
 package com.progbe.domain.terms.service;
 
-import com.progbe.domain.terms.dto.TermsAgreementRequest;
-import com.progbe.domain.terms.dto.TermsAgreementResponse;
-import com.progbe.domain.terms.dto.TermsListResponse;
-import com.progbe.domain.terms.dto.TermsResponseDto;
+import com.progbe.domain.terms.dto.*;
 import com.progbe.domain.terms.entity.TermsEntity;
 import com.progbe.domain.terms.entity.UserTermsAgreementEntity;
 import com.progbe.domain.terms.mapper.TermsMapper;
@@ -18,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -36,7 +34,7 @@ public class TermsService {
     public TermsListResponse getAllTerms() {
         List<TermsResponseDto> terms = termsRepository.findAllByOrderByRequiredDescIdAsc().stream()
                 .map(termsMapper::toTermsResponseDto)
-                .collect(Collectors.toList());
+                .toList();
 
         return new TermsListResponse(terms);
     }
@@ -69,5 +67,50 @@ public class TermsService {
         }
 
         return termsMapper.toTermsAgreementResponse(userId, true);
+    }
+
+    @Transactional
+    public TermsWithdrawalResponse withdrawTermsAgreement(Long userId, TermsWithdrawalRequest request) {
+        if (!userRepository.existsById(userId)) {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND);
+        }
+
+        List<Long> termIds = request.termIds();
+        
+        if (termIds == null || termIds.isEmpty()) {
+            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE);
+        }
+
+        List<Long> withdrawnTermIds = new ArrayList<>();
+
+        for (Long termId : termIds) {
+            UserTermsAgreementEntity agreement = userTermsAgreementRepository
+                    .findByUserIdAndTermsIdForUpdate(userId, termId)
+                    .orElseThrow(() -> new CustomException(ErrorCode.TERMS_AGREEMENT_NOT_FOUND));
+
+            if (!agreement.getIsAgreed() || agreement.getWithdrawnAt() != null) {
+                throw new CustomException(ErrorCode.TERMS_ALREADY_WITHDRAWN);
+            }
+
+            agreement.withdraw();
+            withdrawnTermIds.add(termId);
+        }
+
+        return termsMapper.toTermsWithdrawalResponse(userId, withdrawnTermIds);
+    }
+
+    public UserAgreedTermsResponse getUserAgreedTerms(Long userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND);
+        }
+
+        List<UserTermsAgreementEntity> agreements = userTermsAgreementRepository
+                .findAllByUserIdAndIsAgreedTrueWithTerms(userId);
+
+        List<UserAgreedTermDto> agreedTerms = agreements.stream()
+                .map(termsMapper::toUserAgreedTermDto)
+                .toList();
+
+        return termsMapper.toUserAgreedTermsResponse(userId, agreedTerms);
     }
 }
