@@ -95,14 +95,12 @@ public class UserMapper {
         }
 
         EducationLevel education = profile != null ? profile.getEducation() : null;
-        String major = profile != null ? profile.getMajor() : null;
 
         UserProfileResponse.CareerInfo careerInfo = new UserProfileResponse.CareerInfo(
                 currentStatus,
                 targetJob,
                 careerYear,
-                education,
-                major
+                education
         );
 
         // 3. Self Intro

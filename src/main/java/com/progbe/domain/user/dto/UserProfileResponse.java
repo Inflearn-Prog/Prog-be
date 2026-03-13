@@ -29,8 +29,7 @@ public record UserProfileResponse(
             List<CareerStatus> currentStatus,
             List<JobRole> targetJob,
             String careerYear,
-            EducationLevel education,
-            String major
+            EducationLevel education
     ) {}
 
     public record SelfIntro(
