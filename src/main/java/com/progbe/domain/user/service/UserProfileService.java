@@ -50,7 +50,7 @@ public class UserProfileService {
     public OnboardingResponse saveBasicInfo(Long userId, OnboardingBasicRequest request) {
         UserProfileEntity userProfile = getOrNewUserProfile(userId);
 
-        userProfile.updateBasicInfo(request.educationLevel(), request.major(), request.careerYears());
+        userProfile.updateBasicInfo(request.educationLevel(), "", request.careerYears());
         userProfileRepository.save(userProfile);
 
         return userMapper.toOnboardingResponse(userId, "기본 정보가 저장되었습니다.", "CAREER_INFO");
@@ -196,22 +196,16 @@ public class UserProfileService {
 
         profile.updateCareerInfo(currentStatus, targetJob);
 
-        // education, major, careerYear
+        // education, careerYear
         EducationLevel education = profile.getEducation();
         if (careerInfo.education() != null) {
             education = careerInfo.education();
         }
 
-        String major = profile.getMajor();
-        if (careerInfo.major() != null) {
-            String trimmed = careerInfo.major().trim();
-            major = trimmed.isEmpty() ? null : trimmed;
-        }
-
-        Integer experienceYears = profile.getExperienceYears();
+        Integer experienceYears;
         experienceYears = careerInfo.careerYear();
 
-        profile.updateBasicInfo(education, major, experienceYears);
+        profile.updateBasicInfo(education, "", experienceYears);
     }
 
     private void updateSelfIntro(UserEntity user, UserProfileEntity profile,

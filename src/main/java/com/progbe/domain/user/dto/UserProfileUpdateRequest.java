@@ -25,8 +25,7 @@ public record UserProfileUpdateRequest(
             List<CareerStatus> currentStatus,
             List<JobRole> targetJob,
             Integer careerYear,
-            EducationLevel education,
-            String major
+            EducationLevel education
     ) {}
 
     public record SelfIntro(
