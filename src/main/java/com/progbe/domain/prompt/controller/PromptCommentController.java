@@ -11,10 +11,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
-@RequestMapping("/api/v1/comment")
+@RequestMapping("/comment")
 @Slf4j
 @RequiredArgsConstructor
 public class PromptCommentController {
@@ -24,8 +22,8 @@ public class PromptCommentController {
     // 댓글 생성 API
     @PostMapping("/{promptId}")
     public ApiResponse<PromptCommentResponse> createComment(@AuthenticationPrincipal UserDetails userDetails,
-                                        @PathVariable("promptId") Long promptId,
-                                        @RequestBody PromptCommentRequest promptCommentRequest){
+                                                            @PathVariable("promptId") Long promptId,
+                                                            @RequestBody PromptCommentRequest promptCommentRequest) {
         log.info("[댓글 생성 API] : 요청");
         Long userId = Long.parseLong(userDetails.getUsername());
         PromptCommentResponse result = promptCommentService.createComment(userId, promptId, promptCommentRequest);
@@ -37,8 +35,8 @@ public class PromptCommentController {
     @PostMapping("/{promptId}/{commentId}")
     public ApiResponse<PromptCommentResponse> createReply(@AuthenticationPrincipal UserDetails userDetails,
                                                           @PathVariable("promptId") Long promptId,
-                                      @PathVariable("commentId") Long commentId,
-                                      @RequestBody PromptCommentRequest promptCommentRequest){
+                                                          @PathVariable("commentId") Long commentId,
+                                                          @RequestBody PromptCommentRequest promptCommentRequest) {
         log.info("[대댓글 생성 API] : 요청");
         Long userId = Long.parseLong(userDetails.getUsername());
         PromptCommentResponse result = promptCommentService.createReply(userId, promptId, commentId, promptCommentRequest);
@@ -49,8 +47,8 @@ public class PromptCommentController {
     // 댓글 수정 API
     @PatchMapping("/{commentId}")
     public ApiResponse<PromptCommentResponse> modifyComment(@AuthenticationPrincipal UserDetails userDetails,
-                                        @PathVariable("commentId") Long commentId,
-                                        @RequestBody PromptCommentRequest promptCommentRequest) {
+                                                            @PathVariable("commentId") Long commentId,
+                                                            @RequestBody PromptCommentRequest promptCommentRequest) {
         log.info("[댓글 수정 API] : 요청");
         Long userId = Long.parseLong(userDetails.getUsername());
         PromptCommentResponse result = promptCommentService.modifyComment(userId, commentId, promptCommentRequest);
