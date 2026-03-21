@@ -29,12 +29,12 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     private static final String[] WHITELIST = {
-            "/api/auth/social-login",
-            "/api/auth/refresh",
-            "/api/auth/logout",
-            "/api/app/**",
+            "/auth/social-login",
+            "/auth/refresh",
+            "/auth/logout-all",
+            "/app/**",
             "/h2-console/**",
-            "/terms",
+            "/terms/",
             "/swagger-ui/**",
             "/v3/api-docs/**",
             "/swagger-resources/**"
