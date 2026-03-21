@@ -7,7 +7,6 @@ import com.progbe.domain.auth.dto.TokenResponse;
 import com.progbe.domain.auth.entity.RefreshTokenEntity;
 import com.progbe.domain.auth.mapper.AuthMapper;
 import com.progbe.domain.auth.repository.RefreshTokenRepository;
-import com.progbe.domain.user.dto.SocialTokens;
 import com.progbe.domain.user.dto.UserLoginResult;
 import com.progbe.domain.user.entity.UserEntity;
 import com.progbe.domain.user.repository.UserRepository;
@@ -49,14 +48,12 @@ public class AuthService {
     public SocialLoginResponse socialLogin(SocialLoginRequest request, String deviceInfo) {
         String provider = request.provider().toUpperCase();
 
-        SocialTokens socialTokens = socialApiClient.getSocialTokens(provider, request.authCode());
-
-        OAuth2Attributes oAuth2Attributes = socialApiClient.getSocialUserInfo(provider, socialTokens.accessToken());
+        OAuth2Attributes oAuth2Attributes = socialApiClient.getSocialUserInfo(provider, request.accessToken());
 
         UserLoginResult loginResult = userService.registerOrUpdateUser(
                 provider,
                 oAuth2Attributes,
-                socialTokens.refreshToken()
+                null
         );
 
         UserEntity userEntity = loginResult.user();

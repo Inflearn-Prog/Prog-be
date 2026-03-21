@@ -1,6 +1,5 @@
 package com.progbe.domain.auth.client;
 
-import com.progbe.domain.user.dto.SocialTokens;
 import com.progbe.global.error.ErrorCode;
 import com.progbe.global.error.exception.CustomException;
 import com.progbe.global.oauth.OAuth2Attributes;
@@ -16,10 +15,6 @@ import java.util.List;
 public class SocialApiClient {
 
     private final List<SocialClient> socialClients;
-
-    public SocialTokens getSocialTokens(String provider, String authCode) {
-        return getClient(provider).getSocialTokens(authCode);
-    }
 
     public String refreshAccessToken(String provider, String refreshToken) {
         return getClient(provider).refreshAccessToken(refreshToken);
