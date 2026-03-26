@@ -61,6 +61,15 @@ public class UserController {
         return ApiResponse.success(response);
     }
 
+    @PostMapping("/me/onboarding/complete")
+    public ApiResponse<OnboardingResponse> completeOnboarding(
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        Long userId = Long.parseLong(userDetails.getUsername());
+        OnboardingResponse response = userProfileService.completeOnboarding(userId);
+        return ApiResponse.success(response);
+    }
+
     @PutMapping("/me/onboarding/career")
     public ApiResponse<OnboardingResponse> updateCareerInfo(
             @AuthenticationPrincipal UserDetails userDetails,

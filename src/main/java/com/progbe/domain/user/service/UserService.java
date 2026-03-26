@@ -15,6 +15,8 @@ import com.progbe.global.error.ErrorCode;
 import com.progbe.global.error.exception.CustomException;
 import com.progbe.global.oauth.OAuth2Attributes;
 import lombok.RequiredArgsConstructor;
+import java.util.ArrayList;
+import java.util.List;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,7 +55,8 @@ public class UserService {
 
     private UserLoginResult updateUser(UserEntity user, OAuth2Attributes attributes) {
         user.updateProfile(attributes.nickname(), attributes.profileImageUrl());
-        return new UserLoginResult(user, false);
+        boolean isNewUser = !user.isRegistrationComplete();
+        return new UserLoginResult(user, isNewUser);
     }
 
     private UserLoginResult registerUser(String provider, OAuth2Attributes attributes, String socialRefreshToken) {
@@ -74,6 +77,27 @@ public class UserService {
             throw new CustomException(ErrorCode.USER_NOT_FOUND);
         }
 
+        // 소셜 연동 해제를 먼저 시도 (실패해도 모든 provider 시도)
+        List<String> unlinkFailedProviders = new ArrayList<>();
+        for (UserSocialLinkEntity link : user.getSocialLinks()) {
+            try {
+                String refreshToken = link.getSocialRefreshToken();
+                if (refreshToken != null) {
+                    String accessToken = socialApiClient.refreshAccessToken(link.getProvider(), refreshToken);
+                    if (accessToken != null) {
+                        socialApiClient.unlink(link.getProvider(), accessToken);
+                    }
+                }
+            } catch (Exception e) {
+                unlinkFailedProviders.add(link.getProvider());
+            }
+        }
+
+        if (!unlinkFailedProviders.isEmpty()) {
+            throw new CustomException(ErrorCode.SOCIAL_UNLINK_FAILED);
+        }
+
+        // 연동 해제 성공 후 유저 삭제 처리
         user.delete();
 
         if (request != null && request.reason() != null) {
@@ -81,21 +105,6 @@ public class UserService {
                     userMapper.toWithdrawalHistory(user.getId(), request.reason())
             );
         }
-
-        user.getSocialLinks().forEach(link -> {
-            try {
-                String refreshToken = link.getSocialRefreshToken();
-                if (refreshToken != null) {
-                    String accessToken = socialApiClient.refreshAccessToken(link.getProvider(), refreshToken);
-
-                    if (accessToken != null) {
-                        socialApiClient.unlink(link.getProvider(), accessToken);
-                    }
-                }
-            } catch (Exception e) {
-                throw new CustomException(ErrorCode.SOCIAL_UNLINK_FAILED);
-            }
-        });
 
         String providers = user.getSocialLinks().stream()
                 .map(UserSocialLinkEntity::getProvider)

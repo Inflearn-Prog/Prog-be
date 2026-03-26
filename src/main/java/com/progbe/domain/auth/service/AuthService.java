@@ -58,6 +58,7 @@ public class AuthService {
 
         UserEntity userEntity = loginResult.user();
         boolean isNewUser = loginResult.isNewUser();
+        String registrationStatus = userEntity.getRegistrationStatus().name();
 
         UserDetails principal = new User(userEntity.getId().toString(), "",
                 Collections.singleton(new SimpleGrantedAuthority("ROLE_" + userEntity.getRole().name())));
@@ -72,7 +73,7 @@ public class AuthService {
             saveRefreshToken(userEntity.getId(), refreshToken, deviceInfo);
         }
 
-        return authMapper.toSocialLoginResponse(isNewUser, accessToken, refreshToken);
+        return authMapper.toSocialLoginResponse(isNewUser, registrationStatus, accessToken, refreshToken);
     }
 
     private void revokeAndSaveToken(Long userId, String newTokenValue, String deviceInfo) {

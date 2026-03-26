@@ -11,6 +11,7 @@ import com.progbe.domain.user.repository.UserRepository;
 import com.progbe.domain.user.type.CareerStatus;
 import com.progbe.domain.user.type.EducationLevel;
 import com.progbe.domain.user.type.JobRole;
+import com.progbe.domain.user.type.RegistrationStatus;
 import com.progbe.global.error.ErrorCode;
 import com.progbe.global.error.exception.CustomException;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,8 @@ public class UserProfileService {
 
     @Transactional
     public OnboardingResponse saveCareerInfo(Long userId, OnboardingCareerRequest request) {
+        validateTermsCompleted(userId);
+
         UserProfileEntity userProfile = getOrNewUserProfile(userId);
 
         userProfile.updateCareerInfo(request.currentStatuses(), request.targetJobRoles());
@@ -48,12 +51,37 @@ public class UserProfileService {
 
     @Transactional
     public OnboardingResponse saveBasicInfo(Long userId, OnboardingBasicRequest request) {
+        validateTermsCompleted(userId);
+
         UserProfileEntity userProfile = getOrNewUserProfile(userId);
 
         userProfile.updateBasicInfo(request.educationLevel(), "", request.careerYears());
         userProfileRepository.save(userProfile);
 
         return userMapper.toOnboardingResponse(userId, "기본 정보가 저장되었습니다.", "CAREER_INFO");
+    }
+
+    @Transactional
+    public OnboardingResponse completeOnboarding(Long userId) {
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        if (user.getRegistrationStatus() == RegistrationStatus.SOCIAL_LOGIN_ONLY) {
+            throw new CustomException(ErrorCode.TERMS_NOT_COMPLETED);
+        }
+
+        user.updateRegistrationStatus(RegistrationStatus.ONBOARDING_COMPLETED);
+
+        return userMapper.toOnboardingResponse(userId, "온보딩이 완료되었습니다.", "COMPLETED");
+    }
+
+    private void validateTermsCompleted(Long userId) {
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        if (user.getRegistrationStatus() == RegistrationStatus.SOCIAL_LOGIN_ONLY) {
+            throw new CustomException(ErrorCode.TERMS_NOT_COMPLETED);
+        }
     }
 
     private UserProfileEntity getOrNewUserProfile(Long userId) {
