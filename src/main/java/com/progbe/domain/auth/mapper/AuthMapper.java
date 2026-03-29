@@ -7,9 +7,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class AuthMapper {
 
-    public SocialLoginResponse toSocialLoginResponse(boolean isNewUser, String accessToken, String refreshToken) {
+    public SocialLoginResponse toSocialLoginResponse(boolean isNewUser, String registrationStatus, String accessToken, String refreshToken) {
         return SocialLoginResponse.builder()
                 .isNewUser(isNewUser)
+                .registrationStatus(registrationStatus)
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();

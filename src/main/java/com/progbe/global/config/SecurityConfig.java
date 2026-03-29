@@ -31,6 +31,7 @@ public class SecurityConfig {
     private static final String[] WHITELIST = {
             "/auth/social-login",
             "/auth/refresh",
+            "/auth/logout",
             "/auth/logout-all",
             "/app/**",
             "/h2-console/**",

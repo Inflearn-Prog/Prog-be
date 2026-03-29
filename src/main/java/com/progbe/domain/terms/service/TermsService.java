@@ -51,20 +51,52 @@ public class TermsService {
         Map<Long, TermsEntity> termsMap = allTerms.stream()
                 .collect(Collectors.toMap(TermsEntity::getId, Function.identity()));
 
-        // 2. 약관 동의 내역 저장
+        // 2. 존재하지 않는 약관 ID 검증
         for (Long termId : agreedTermIds) {
-            TermsEntity term = termsMap.get(termId);
-            if (term != null) {
-                UserTermsAgreementEntity agreement = UserTermsAgreementEntity.builder()
-                        .user(user)
-                        .terms(term)
-                        .isAgreed(true)
-                        .version(term.getUpdatedAt() != null ? term.getUpdatedAt() : LocalDateTime.now())
-                        .build();
-                
-                userTermsAgreementRepository.save(agreement);
+            if (!termsMap.containsKey(termId)) {
+                throw new CustomException(ErrorCode.TERMS_NOT_FOUND);
             }
         }
+
+        // 2-1. 필수 약관 전체 동의 검증
+        boolean allRequiredAgreed = allTerms.stream()
+                .filter(TermsEntity::getRequired)
+                .allMatch(t -> agreedTermIds.contains(t.getId()));
+        if (!allRequiredAgreed) {
+            throw new CustomException(ErrorCode.REQUIRED_TERMS_NOT_AGREED);
+        }
+
+        // 3. 약관 동의 내역 저장 (중복 체크 포함)
+        for (Long termId : agreedTermIds) {
+            TermsEntity term = termsMap.get(termId);
+            
+            // 기존 동의 내역 확인
+            userTermsAgreementRepository.findByUserIdAndTermsId(userId, termId)
+                    .ifPresentOrElse(
+                            existingAgreement -> {
+                                // 이미 동의한 약관인 경우
+                                if (existingAgreement.getIsAgreed() && existingAgreement.getWithdrawnAt() == null) {
+                                    throw new CustomException(ErrorCode.TERMS_ALREADY_AGREED);
+                                }
+                                // 철회했던 약관을 재동의하는 경우
+                                existingAgreement.reAgree();
+                            },
+                            () -> {
+                                // 새로운 동의인 경우
+                                UserTermsAgreementEntity agreement = UserTermsAgreementEntity.builder()
+                                        .user(user)
+                                        .terms(term)
+                                        .isAgreed(true)
+                                        .version(term.getUpdatedAt() != null ? term.getUpdatedAt() : LocalDateTime.now())
+                                        .build();
+                                
+                                userTermsAgreementRepository.save(agreement);
+                            }
+                    );
+        }
+
+        // 4. 약관 동의 완료 시 회원가입 상태 업데이트
+        user.updateRegistrationStatus(com.progbe.domain.user.type.RegistrationStatus.TERMS_AGREED);
 
         return termsMapper.toTermsAgreementResponse(userId, true);
     }
@@ -79,6 +111,16 @@ public class TermsService {
         
         if (termIds == null || termIds.isEmpty()) {
             throw new CustomException(ErrorCode.INVALID_INPUT_VALUE);
+        }
+
+        // 필수 약관 철회 차단
+        List<TermsEntity> requiredTerms = termsRepository.findAll().stream()
+                .filter(TermsEntity::getRequired)
+                .toList();
+        for (TermsEntity required : requiredTerms) {
+            if (termIds.contains(required.getId())) {
+                throw new CustomException(ErrorCode.REQUIRED_TERMS_CANNOT_WITHDRAW);
+            }
         }
 
         List<Long> withdrawnTermIds = new ArrayList<>();

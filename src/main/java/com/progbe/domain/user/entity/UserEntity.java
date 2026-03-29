@@ -1,6 +1,7 @@
 package com.progbe.domain.user.entity;
 
 import com.progbe.domain.terms.entity.UserTermsAgreementEntity;
+import com.progbe.domain.user.type.RegistrationStatus;
 import com.progbe.domain.user.type.Role;
 import com.progbe.domain.user.type.UserStatus;
 import com.progbe.global.common.BaseEntity;
@@ -42,6 +43,10 @@ public class UserEntity extends BaseEntity {
     @Column(nullable = false)
     private UserStatus status;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "registration_status", nullable = false)
+    private RegistrationStatus registrationStatus;
+
     @Column(name = "last_nickname_changed_at")
     private LocalDateTime lastNicknameChangedAt;
 
@@ -64,6 +69,7 @@ public class UserEntity extends BaseEntity {
         this.profileUrl = profileUrl;
         this.role = role;
         this.status = status;
+        this.registrationStatus = RegistrationStatus.SOCIAL_LOGIN_ONLY;
         this.nicknameChangeCount = 0;
     }
 
@@ -80,6 +86,16 @@ public class UserEntity extends BaseEntity {
 
     public void updateStatus(UserStatus status) {
         this.status = status;
+    }
+
+    public void updateRegistrationStatus(RegistrationStatus newStatus) {
+        if (newStatus.ordinal() > this.registrationStatus.ordinal()) {
+            this.registrationStatus = newStatus;
+        }
+    }
+
+    public boolean isRegistrationComplete() {
+        return this.registrationStatus == RegistrationStatus.ONBOARDING_COMPLETED;
     }
 
     @Override

@@ -51,6 +51,8 @@ public class UserTermsAgreementEntity extends BaseEntity {
     public UserTermsAgreementEntity(UserEntity user, TermsEntity terms, LocalDateTime version, Boolean isAgreed) {
         this.user = user;
         this.terms = terms;
+        this.userId = user.getId();
+        this.termsId = terms.getId();
         this.version = version;
         this.isAgreed = isAgreed;
         this.agreedAt = LocalDateTime.now();
