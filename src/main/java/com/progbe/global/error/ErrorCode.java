@@ -33,6 +33,8 @@ public enum ErrorCode {
     REQUIRED_TERMS_NOT_AGREED(HttpStatus.BAD_REQUEST, "필수 약관에 모두 동의해주세요."),
     REQUIRED_TERMS_CANNOT_WITHDRAW(HttpStatus.BAD_REQUEST, "필수 약관은 철회할 수 없습니다. 서비스 탈퇴를 원하시면 회원 탈퇴를 진행해주세요."),
     TERMS_NOT_COMPLETED(HttpStatus.FORBIDDEN, "약관 동의가 완료되지 않았습니다."),
+    NICKNAME_NOT_REGISTERED(HttpStatus.FORBIDDEN, "닉네임 등록이 완료되지 않았습니다."),
+    CAREER_INFO_NOT_COMPLETED(HttpStatus.FORBIDDEN, "커리어 정보 입력이 완료되지 않았습니다."),
 
     QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 문의사항입니다."),
     ANSWER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 답변입니다."),

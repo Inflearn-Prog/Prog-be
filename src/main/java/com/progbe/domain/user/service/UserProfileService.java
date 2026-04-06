@@ -39,19 +39,24 @@ public class UserProfileService {
 
     @Transactional
     public OnboardingResponse saveCareerInfo(Long userId, OnboardingCareerRequest request) {
-        validateTermsCompleted(userId);
+        validateNicknameRegistered(userId);
+
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         UserProfileEntity userProfile = getOrNewUserProfile(userId);
 
         userProfile.updateCareerInfo(request.currentStatuses(), request.targetJobRoles());
         userProfileRepository.save(userProfile);
 
+        user.updateRegistrationStatus(RegistrationStatus.CAREER_INFO_COMPLETED);
+
         return userMapper.toOnboardingResponse(userId, "커리어 정보가 성공적으로 저장되었습니다.", "CAREER_DETAILS");
     }
 
     @Transactional
     public OnboardingResponse saveBasicInfo(Long userId, OnboardingBasicRequest request) {
-        validateTermsCompleted(userId);
+        validateNicknameRegistered(userId);
 
         UserProfileEntity userProfile = getOrNewUserProfile(userId);
 
@@ -66,8 +71,8 @@ public class UserProfileService {
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        if (user.getRegistrationStatus() == RegistrationStatus.SOCIAL_LOGIN_ONLY) {
-            throw new CustomException(ErrorCode.TERMS_NOT_COMPLETED);
+        if (user.getRegistrationStatus().ordinal() < RegistrationStatus.CAREER_INFO_COMPLETED.ordinal()) {
+            throw new CustomException(ErrorCode.CAREER_INFO_NOT_COMPLETED);
         }
 
         user.updateRegistrationStatus(RegistrationStatus.ONBOARDING_COMPLETED);
@@ -75,12 +80,12 @@ public class UserProfileService {
         return userMapper.toOnboardingResponse(userId, "온보딩이 완료되었습니다.", "COMPLETED");
     }
 
-    private void validateTermsCompleted(Long userId) {
+    private void validateNicknameRegistered(Long userId) {
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        if (user.getRegistrationStatus() == RegistrationStatus.SOCIAL_LOGIN_ONLY) {
-            throw new CustomException(ErrorCode.TERMS_NOT_COMPLETED);
+        if (user.getRegistrationStatus().ordinal() < RegistrationStatus.NICKNAME_REGISTERED.ordinal()) {
+            throw new CustomException(ErrorCode.NICKNAME_NOT_REGISTERED);
         }
     }
 
@@ -132,6 +137,7 @@ public class UserProfileService {
 
         try {
             validateAndChangeNickname(user, nickname);
+            user.updateRegistrationStatus(RegistrationStatus.NICKNAME_REGISTERED);
             return new NicknameRegisterResponse("닉네임이 성공적으로 등록되었습니다.");
         } catch (DataIntegrityViolationException e) {
             throw new CustomException(ErrorCode.NICKNAME_ALREADY_USED);
