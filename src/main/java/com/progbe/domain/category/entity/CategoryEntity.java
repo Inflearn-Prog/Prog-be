@@ -20,7 +20,8 @@ import java.util.List;
                 )
         },
         indexes = {
-                @Index(name = "idx_category_parent_id", columnList = "parent_id")
+                @Index(name = "idx_category_parent_id", columnList = "parent_id"),
+                @Index(name = "idx_category_display_order", columnList = "display_order")
         }
 )
 @Getter
@@ -45,11 +46,15 @@ public class CategoryEntity extends BaseEntity {
     @OneToMany(mappedBy = "parent")
     private List<CategoryEntity> children = new ArrayList<>();
 
+    @Column(name = "display_order", nullable = false)
+    private Integer displayOrder = 0;
+
     @Builder
-    public CategoryEntity(String name, String description, CategoryEntity parent) {
+    public CategoryEntity(String name, String description, CategoryEntity parent, Integer displayOrder) {
         this.name = name;
         this.description = description;
         this.parent = parent;
+        this.displayOrder = displayOrder != null ? displayOrder : 0;
     }
 
     // 어드민에서 카테고리 관리 고려
@@ -67,6 +72,10 @@ public class CategoryEntity extends BaseEntity {
 
     public boolean isParentCategory() {
         return parent == null;
+    }
+
+    public void updateDisplayOrder(Integer displayOrder) {
+        this.displayOrder = displayOrder;
     }
 }
 

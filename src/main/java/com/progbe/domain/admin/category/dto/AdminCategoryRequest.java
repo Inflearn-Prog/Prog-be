@@ -1,7 +1,10 @@
 package com.progbe.domain.admin.category.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+
+import java.util.List;
 
 public class AdminCategoryRequest {
 
@@ -26,6 +29,13 @@ public class AdminCategoryRequest {
             String description,
 
             Long parentId
+    ) {
+    }
+
+    public record UpdateOrderRequest(
+            @NotNull(message = "카테고리 ID 목록은 필수입니다.")
+            @Size(min = 1, message = "최소 1개 이상의 카테고리 ID가 필요합니다.")
+            List<Long> categoryIds
     ) {
     }
 }

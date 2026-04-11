@@ -22,6 +22,15 @@ public class NoticeRequest {
     ) {
     }
 
+    public record UpdateNoticeRequest(
+            @Size(max = 50, message = "제목은 50자 이내여야 합니다.")
+            String title,
+
+            @Size(max = 5000, message = "내용은 5000자 이내여야 합니다.")
+            String content
+    ) {
+    }
+
     public record BulkDeleteRequest(
             @NotNull(message = "삭제할 공지사항 ID 목록은 필수입니다.")
             @Size(min = 1, message = "최소 1개 이상의 ID가 필요합니다.")
