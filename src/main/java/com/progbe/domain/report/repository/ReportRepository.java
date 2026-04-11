@@ -32,13 +32,16 @@ public interface ReportRepository extends JpaRepository<ReportEntity, Long> {
 
     @Query("SELECT new com.progbe.domain.report.dto.PendingReportDto(" +
            "r.id, r.createdAt, r.reason, " +
-           "COALESCE(p.title, '(삭제된 게시글)'), " +
+           "CASE WHEN r.targetType = TargetType.PROMPT THEN COALESCE(p.title, '(삭제된 게시글)') " +
+           "     WHEN r.targetType = TargetType.COMMENT THEN COALESCE(c.comment, '(삭제된 댓글)') " +
+           "     ELSE '(알 수 없음)' END, " +
            "u.nickname, " +
            "CASE WHEN r.reason = ReportReason.OTHER THEN r.reasonDetail ELSE '' END, " +
            "r.status) " +
            "FROM ReportEntity r " +
            "JOIN r.reporter u " +
            "LEFT JOIN PromptEntity p ON r.targetId = p.id AND r.targetType = TargetType.PROMPT " +
+           "LEFT JOIN PromptCommentEntity c ON r.targetId = c.id AND r.targetType = TargetType.COMMENT " +
            "WHERE r.status = :status " +
            "ORDER BY r.createdAt DESC")
     Page<PendingReportDto> findPendingReportsAsDto(@Param("status") ReportStatus status, Pageable pageable);

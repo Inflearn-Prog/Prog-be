@@ -122,4 +122,21 @@ public class AdminController {
         ReportProcessResponse response = adminReportService.processReport(reportId, request);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
+
+    @PatchMapping("/reports/{reportId}/reject")
+    public ResponseEntity<ApiResponse<ReportProcessResponse>> rejectReport(
+            @PathVariable Long reportId,
+            @Valid @RequestBody ReportProcessRequest request
+    ) {
+        ReportProcessResponse response = adminReportService.rejectReport(reportId, request);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @DeleteMapping("/comments/{commentId}")
+    public ResponseEntity<ApiResponse<Void>> deleteComment(
+            @PathVariable Long commentId
+    ) {
+        adminReportService.deleteComment(commentId);
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
 }

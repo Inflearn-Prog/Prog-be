@@ -1,6 +1,8 @@
 package com.progbe.domain.report.service;
 
+import com.progbe.domain.prompt.entity.PromptCommentEntity;
 import com.progbe.domain.prompt.entity.PromptEntity;
+import com.progbe.domain.prompt.repository.PromptCommentRepository;
 import com.progbe.domain.prompt.repository.PromptRepository;
 import com.progbe.domain.prompt.type.PromptStatus;
 import com.progbe.domain.report.dto.PendingReportDto;
@@ -10,6 +12,7 @@ import com.progbe.domain.report.dto.ReportProcessResponse;
 import com.progbe.domain.report.entity.ReportEntity;
 import com.progbe.domain.report.mapper.ReportMapper;
 import com.progbe.domain.report.repository.ReportRepository;
+import com.progbe.domain.report.type.ReportAction;
 import com.progbe.domain.report.type.ReportStatus;
 import com.progbe.domain.report.type.TargetType;
 import com.progbe.domain.user.entity.UserEntity;
@@ -33,6 +36,7 @@ public class AdminReportService {
 
     private final ReportRepository reportRepository;
     private final PromptRepository promptRepository;
+    private final PromptCommentRepository promptCommentRepository;
     private final UserRepository userRepository;
     private final ReportMapper reportMapper;
 
@@ -57,12 +61,16 @@ public class AdminReportService {
         ReportEntity report = reportRepository.findByIdWithLock(reportId)
                 .orElseThrow(() -> new CustomException(ErrorCode.REPORT_NOT_FOUND));
 
-        if (report.getStatus() == ReportStatus.PROCESSED) {
+        if (report.getStatus() != ReportStatus.PENDING) {
             throw new CustomException(ErrorCode.ALREADY_PROCESSED);
         }
 
+        ReportAction action = request.action() != null ? request.action() : ReportAction.PRIVATE;
+
         if (report.getTargetType() == TargetType.PROMPT) {
-            processPromptReport(report);
+            processPromptReport(report, action);
+        } else if (report.getTargetType() == TargetType.COMMENT) {
+            processCommentReport(report);
         }
 
         report.process(request.adminRemark());
@@ -71,7 +79,22 @@ public class AdminReportService {
         return reportMapper.toProcessResponse(report);
     }
 
-    private void processPromptReport(ReportEntity report) {
+    @Transactional
+    public ReportProcessResponse rejectReport(Long reportId, ReportProcessRequest request) {
+        ReportEntity report = reportRepository.findByIdWithLock(reportId)
+                .orElseThrow(() -> new CustomException(ErrorCode.REPORT_NOT_FOUND));
+
+        if (report.getStatus() != ReportStatus.PENDING) {
+            throw new CustomException(ErrorCode.ALREADY_PROCESSED);
+        }
+
+        report.reject(request.adminRemark());
+        reportRepository.save(report);
+
+        return reportMapper.toProcessResponse(report);
+    }
+
+    private void processPromptReport(ReportEntity report, ReportAction action) {
         Optional<PromptEntity> promptOpt = promptRepository.findById(report.getTargetId());
 
         if (promptOpt.isEmpty()) {
@@ -81,8 +104,38 @@ public class AdminReportService {
         PromptEntity prompt = promptOpt.get();
         UserEntity author = prompt.getUser();
 
-        prompt.updateStatus(PromptStatus.PRIVATE);
+        if (action == ReportAction.DELETE) {
+            prompt.updateStatus(PromptStatus.DELETED);
+        } else {
+            prompt.updateStatus(PromptStatus.PRIVATE);
+        }
         promptRepository.save(prompt);
+
+        author.updateStatus(UserStatus.SUSPENDED);
+        userRepository.save(author);
+    }
+
+    @Transactional
+    public void deleteComment(Long commentId) {
+        PromptCommentEntity comment = promptCommentRepository.findById(commentId)
+                .orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
+
+        comment.softDelete();
+        promptCommentRepository.save(comment);
+    }
+
+    private void processCommentReport(ReportEntity report) {
+        Optional<PromptCommentEntity> commentOpt = promptCommentRepository.findById(report.getTargetId());
+
+        if (commentOpt.isEmpty()) {
+            return;
+        }
+
+        PromptCommentEntity comment = commentOpt.get();
+        UserEntity author = comment.getUser();
+
+        comment.softDelete();
+        promptCommentRepository.save(comment);
 
         author.updateStatus(UserStatus.SUSPENDED);
         userRepository.save(author);
