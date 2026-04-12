@@ -22,7 +22,9 @@ public class PromptLikeEntity extends BaseEntity {
     private UserEntity user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "prompt_id", nullable = false)
+    @JoinColumn(name = "prompt_id", nullable = false,
+            foreignKey = @ForeignKey(name = "fk_like_prompt",
+                    foreignKeyDefinition = "FOREIGN KEY (prompt_id) REFERENCES prompts(prompt_id) ON DELETE CASCADE"))
     private PromptEntity prompt;
 
     public PromptLikeEntity() { }

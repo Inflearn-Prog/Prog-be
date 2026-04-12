@@ -75,4 +75,10 @@ public class ReportEntity extends BaseEntity {
         this.adminRemark = adminRemark;
         this.processedAt = LocalDateTime.now();
     }
+
+    public void reject(String adminRemark) {
+        this.status = ReportStatus.REJECTED;
+        this.adminRemark = adminRemark;
+        this.processedAt = LocalDateTime.now();
+    }
 }

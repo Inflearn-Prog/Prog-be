@@ -4,6 +4,7 @@ import com.progbe.domain.admin.dto.UserCountDto;
 import com.progbe.domain.prompt.entity.PromptCommentEntity;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.repository.query.Param;
@@ -37,4 +38,8 @@ public interface PromptCommentRepository extends JpaRepository<PromptCommentEnti
     Slice<PromptCommentEntity> findSliceAllByPromptId(Long promptId);
 
     List<PromptCommentEntity> findAllByDeletedAtBefore(LocalDateTime dateTime);
+
+    @Modifying
+    @Query("DELETE FROM PromptCommentEntity c WHERE c.deletedAt IS NOT NULL AND c.deletedAt < :threshold")
+    int deleteAllByDeletedAtBefore(@Param("threshold") LocalDateTime threshold);
 }

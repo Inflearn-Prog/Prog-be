@@ -12,6 +12,11 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -36,10 +41,13 @@ public class AdminCategoryService {
             }
         }
 
+        int nextOrder = categoryRepository.findMaxDisplayOrder() + 1;
+
         CategoryEntity category = CategoryEntity.builder()
                 .name(request.name())
                 .description(request.description())
                 .parent(parent)
+                .displayOrder(nextOrder)
                 .build();
 
         try {
@@ -106,5 +114,33 @@ public class AdminCategoryService {
 
         category.delete();
         return AdminCategoryResponse.CategoryDeleteResponse.success();
+    }
+
+    @Transactional
+    public AdminCategoryResponse.CategoryOrderUpdateResponse updateCategoryOrder(
+            AdminCategoryRequest.UpdateOrderRequest request) {
+        List<Long> categoryIds = request.categoryIds();
+        List<CategoryEntity> categories = categoryRepository.findAllByIdsAndNotDeleted(categoryIds);
+
+        if (categories.size() != categoryIds.size()) {
+            throw new CustomException(ErrorCode.CATEGORY_NOT_FOUND);
+        }
+
+        Map<Long, CategoryEntity> categoryMap = categories.stream()
+                .collect(Collectors.toMap(CategoryEntity::getId, Function.identity()));
+
+        for (int i = 0; i < categoryIds.size(); i++) {
+            categoryMap.get(categoryIds.get(i)).updateDisplayOrder(i);
+        }
+
+        return AdminCategoryResponse.CategoryOrderUpdateResponse.success(categoryIds.size());
+    }
+
+    public AdminCategoryResponse.CategoryListResponse getCategoryList() {
+        List<CategoryEntity> categories = categoryRepository.findAllByNotDeleted();
+        List<AdminCategoryResponse.CategoryInfo> categoryInfos = categories.stream()
+                .map(AdminCategoryResponse.CategoryInfo::from)
+                .toList();
+        return new AdminCategoryResponse.CategoryListResponse(categoryInfos);
     }
 }

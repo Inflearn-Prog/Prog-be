@@ -16,6 +16,12 @@ public class AdminCategoryController {
 
     private final AdminCategoryService adminCategoryService;
 
+    @GetMapping
+    public ResponseEntity<ApiResponse<AdminCategoryResponse.CategoryListResponse>> getCategoryList() {
+        AdminCategoryResponse.CategoryListResponse response = adminCategoryService.getCategoryList();
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
     @PostMapping
     public ResponseEntity<ApiResponse<AdminCategoryResponse.CategoryCreateResponse>> createCategory(
             @Valid @RequestBody AdminCategoryRequest.CreateRequest request
@@ -30,6 +36,14 @@ public class AdminCategoryController {
             @Valid @RequestBody AdminCategoryRequest.UpdateRequest request
     ) {
         AdminCategoryResponse.CategoryUpdateResponse response = adminCategoryService.updateCategory(categoryId, request);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @PutMapping("/order")
+    public ResponseEntity<ApiResponse<AdminCategoryResponse.CategoryOrderUpdateResponse>> updateCategoryOrder(
+            @Valid @RequestBody AdminCategoryRequest.UpdateOrderRequest request
+    ) {
+        AdminCategoryResponse.CategoryOrderUpdateResponse response = adminCategoryService.updateCategoryOrder(request);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 

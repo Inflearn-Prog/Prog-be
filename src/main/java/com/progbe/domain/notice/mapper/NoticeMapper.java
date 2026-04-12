@@ -3,7 +3,11 @@ package com.progbe.domain.notice.mapper;
 import com.progbe.domain.notice.dto.NoticeRequest;
 import com.progbe.domain.notice.dto.NoticeResponse;
 import com.progbe.domain.notice.entity.NoticeEntity;
+import com.progbe.global.common.CommonResponse;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class NoticeMapper {
@@ -25,6 +29,35 @@ public class NoticeMapper {
     public NoticeResponse.BulkDeleteResponse toBulkDeleteResponse(int requestedCount, int deletedCount) {
         String message = buildDeleteMessage(requestedCount, deletedCount);
         return new NoticeResponse.BulkDeleteResponse(deletedCount, message);
+    }
+
+    public NoticeResponse.NoticeListResponse toNoticeListResponse(Page<NoticeEntity> page) {
+        List<NoticeResponse.NoticeInfo> content = page.getContent().stream()
+                .map(n -> new NoticeResponse.NoticeInfo(n.getId(), n.getTitle(), n.getCreatedAt()))
+                .toList();
+        CommonResponse.PageInfoResponse pageInfo = CommonResponse.PageInfoResponse.builder()
+                .currentPage(page.getNumber())
+                .pageSize(page.getSize())
+                .totalPages(page.getTotalPages())
+                .totalCount((int) page.getTotalElements())
+                .build();
+        return new NoticeResponse.NoticeListResponse(content, pageInfo);
+    }
+
+    public NoticeResponse.NoticeDetailResponse toNoticeDetailResponse(NoticeEntity entity) {
+        return new NoticeResponse.NoticeDetailResponse(
+                entity.getId(),
+                entity.getTitle(),
+                entity.getContent(),
+                entity.getCreatedAt()
+        );
+    }
+
+    public NoticeResponse.UpdateNoticeResponse toUpdateResponse(NoticeEntity entity) {
+        return new NoticeResponse.UpdateNoticeResponse(
+                entity.getId(),
+                "공지사항이 성공적으로 수정되었습니다."
+        );
     }
 
     private String buildDeleteMessage(int requestedCount, int deletedCount) {

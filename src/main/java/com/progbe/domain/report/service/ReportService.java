@@ -1,6 +1,8 @@
 package com.progbe.domain.report.service;
 
+import com.progbe.domain.prompt.entity.PromptCommentEntity;
 import com.progbe.domain.prompt.entity.PromptEntity;
+import com.progbe.domain.prompt.repository.PromptCommentRepository;
 import com.progbe.domain.prompt.repository.PromptRepository;
 import com.progbe.domain.report.dto.ReportCreateRequest;
 import com.progbe.domain.report.dto.ReportCreateResponse;
@@ -23,6 +25,7 @@ public class ReportService {
 
     private final ReportRepository reportRepository;
     private final PromptRepository promptRepository;
+    private final PromptCommentRepository promptCommentRepository;
     private final UserRepository userRepository;
     private final ReportMapper reportMapper;
     private final ReportValidator reportValidator;
@@ -59,6 +62,13 @@ public class ReportService {
                     .orElseThrow(() -> new CustomException(ErrorCode.PROMPT_NOT_FOUND));
 
             if (prompt.getUser().getId().equals(reporterId)) {
+                throw new CustomException(ErrorCode.CANNOT_REPORT_SELF);
+            }
+        } else if (request.targetType() == TargetType.COMMENT) {
+            PromptCommentEntity comment = promptCommentRepository.findById(request.targetId())
+                    .orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
+
+            if (comment.getUser().getId().equals(reporterId)) {
                 throw new CustomException(ErrorCode.CANNOT_REPORT_SELF);
             }
         }

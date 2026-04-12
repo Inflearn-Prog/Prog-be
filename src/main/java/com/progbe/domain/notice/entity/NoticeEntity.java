@@ -35,4 +35,13 @@ public class NoticeEntity extends BaseEntity {
         this.title = title;
         this.content = content;
     }
+
+    public void update(String title, String content) {
+        if (title != null) {
+            this.title = title.trim();
+        }
+        if (content != null) {
+            this.content = content.trim();
+        }
+    }
 }
