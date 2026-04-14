@@ -8,6 +8,9 @@ import com.progbe.domain.user.service.UserService;
 import com.progbe.global.error.ErrorCode;
 import com.progbe.global.error.exception.CustomException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,11 +60,11 @@ public class QnAService {
         return AnswerResponse.of(answer);
     }
 
-    // 다건 조회
-    //TODO : UI에 맞게 페이징 및 슬라이싱 처리
-    public List<QuestionResponse> getQuestions() {
-        List<QuestionEntity> questions = questionReader.readAll();
-        return QuestionResponse.listOf(questions);
+    // 다건 조회 (페이지네이션)
+    public List<QuestionResponse> getQuestions(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<QuestionEntity> questions = questionReader.readAll(pageable);
+        return QuestionResponse.listOf(questions.getContent());
     }
 
     // 단건 조회

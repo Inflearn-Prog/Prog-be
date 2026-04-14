@@ -12,6 +12,6 @@ public class QuestionDeleter {
     private final QuestionRepository questionRepository;
 
     public void delete(QuestionEntity question) {
-        questionRepository.delete(question);
+        question.delete();
     }
 }

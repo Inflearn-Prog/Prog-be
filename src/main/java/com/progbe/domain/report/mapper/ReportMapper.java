@@ -32,8 +32,8 @@ public class ReportMapper {
         );
     }
 
-    public PendingReportDto toPendingReportDto(ReportEntity report, String targetPromptTitle, String reporterNickname) {
-        String reportContent = report.getReason() == ReportReason.OTHER
+    public PendingReportDto toPendingReportDto(ReportEntity report, String targetTitle, String reporterNickname) {
+        String reasonContent = report.getReason() == ReportReason.OTHER
                 ? report.getReasonDetail()
                 : report.getReason().getDisplayText();
 
@@ -41,9 +41,9 @@ public class ReportMapper {
                 report.getId(),
                 report.getCreatedAt(),
                 report.getReason(),
-                targetPromptTitle,
+                targetTitle,
                 reporterNickname,
-                reportContent,
+                reasonContent,
                 report.getStatus()
         );
     }
@@ -52,7 +52,7 @@ public class ReportMapper {
         return new ReportProcessResponse(
                 report.getId(),
                 report.getTargetId(),
-                report.getTargetType().name(),
+                report.getTargetType(),
                 report.getProcessedAt()
         );
     }

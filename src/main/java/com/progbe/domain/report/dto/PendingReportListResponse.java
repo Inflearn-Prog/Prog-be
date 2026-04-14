@@ -1,16 +1,11 @@
 package com.progbe.domain.report.dto;
 
+import com.progbe.global.common.CommonResponse;
+
 import java.util.List;
 
 public record PendingReportListResponse(
         List<PendingReportDto> content,
-        PageInfo pageInfo
+        CommonResponse.PageInfoResponse pageInfo
 ) {
-    public record PageInfo(
-            int currentPage,
-            int size,
-            long totalElements,
-            int totalPages
-    ) {
-    }
 }

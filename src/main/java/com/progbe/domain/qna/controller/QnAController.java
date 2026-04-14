@@ -44,9 +44,12 @@ public class QnAController {
 
     // 전체 문의 내역 보기
     @GetMapping("/list")
-    public ApiResponse<List<QuestionResponse>> list() {
+    public ApiResponse<List<QuestionResponse>> list(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
         log.info("[문의 전체 확인 API] : 요청");
-        List<QuestionResponse> result = qnAService.getQuestions();
+        List<QuestionResponse> result = qnAService.getQuestions(page, size);
         log.info("[문의 전체 확인 API] : 완료");
         return ApiResponse.success(result);
     }

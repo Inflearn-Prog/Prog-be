@@ -18,6 +18,7 @@ import com.progbe.domain.report.type.TargetType;
 import com.progbe.domain.user.entity.UserEntity;
 import com.progbe.domain.user.repository.UserRepository;
 import com.progbe.domain.user.type.UserStatus;
+import com.progbe.global.common.CommonResponse;
 import com.progbe.global.error.ErrorCode;
 import com.progbe.global.error.exception.CustomException;
 import lombok.RequiredArgsConstructor;
@@ -46,12 +47,12 @@ public class AdminReportService {
         Page<PendingReportDto> reportPage = reportRepository.findPendingReportsAsDto(
                 ReportStatus.PENDING, pageable);
 
-        PendingReportListResponse.PageInfo pageInfo = new PendingReportListResponse.PageInfo(
-                reportPage.getNumber(),
-                reportPage.getSize(),
-                reportPage.getTotalElements(),
-                reportPage.getTotalPages()
-        );
+        CommonResponse.PageInfoResponse pageInfo = CommonResponse.PageInfoResponse.builder()
+                .currentPage(reportPage.getNumber())
+                .pageSize(reportPage.getSize())
+                .totalPages(reportPage.getTotalPages())
+                .totalCount((int) reportPage.getTotalElements())
+                .build();
 
         return new PendingReportListResponse(reportPage.getContent(), pageInfo);
     }

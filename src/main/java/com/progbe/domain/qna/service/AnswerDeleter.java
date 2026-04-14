@@ -14,11 +14,10 @@ public class AnswerDeleter {
     private final AnswerRepository answerRepository;
 
     public void deleteAnswer(Long questionId) {
-
         AnswerEntity answerEntity = answerReader.readByQuestionId(questionId);
 
         if (answerEntity != null) {
-            answerRepository.delete(answerEntity);
+            answerEntity.delete();
         }
     }
 }

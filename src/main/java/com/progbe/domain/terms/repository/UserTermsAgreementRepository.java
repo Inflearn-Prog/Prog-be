@@ -17,7 +17,7 @@ public interface UserTermsAgreementRepository extends JpaRepository<UserTermsAgr
     
     @Query("SELECT uta FROM UserTermsAgreementEntity uta " +
            "JOIN FETCH uta.terms " +
-           "WHERE uta.userId = :userId AND uta.isAgreed = true")
+           "WHERE uta.userId = :userId AND uta.isAgreed = true AND uta.withdrawnAt IS NULL")
     List<UserTermsAgreementEntity> findAllByUserIdAndIsAgreedTrueWithTerms(@Param("userId") Long userId);
     
     @Lock(LockModeType.PESSIMISTIC_WRITE)
