@@ -217,29 +217,29 @@ public class UserProfileService {
             return;
         }
 
-        // currentStatus, targetJob
-        List<CareerStatus> currentStatus = profile.getCurrentStatus();
-        if (careerInfo.currentStatus() != null) {
-            currentStatus = careerInfo.currentStatus();
+        List<CareerStatus> currentStatuses = profile.getCurrentStatus();
+        if (careerInfo.currentStatuses() != null) {
+            currentStatuses = careerInfo.currentStatuses();
         }
 
-        List<JobRole> targetJob = profile.getTargetJob();
-        if (careerInfo.targetJob() != null) {
-            targetJob = careerInfo.targetJob();
+        List<JobRole> targetJobRoles = profile.getTargetJob();
+        if (careerInfo.targetJobRoles() != null) {
+            targetJobRoles = careerInfo.targetJobRoles();
         }
 
-        profile.updateCareerInfo(currentStatus, targetJob);
+        profile.updateCareerInfo(currentStatuses, targetJobRoles);
 
-        // education, careerYear
-        EducationLevel education = profile.getEducation();
-        if (careerInfo.education() != null) {
-            education = careerInfo.education();
+        EducationLevel educationLevel = profile.getEducation();
+        if (careerInfo.educationLevel() != null) {
+            educationLevel = careerInfo.educationLevel();
         }
 
-        Integer experienceYears;
-        experienceYears = careerInfo.careerYear();
+        Integer experienceYears = profile.getExperienceYears();
+        if (careerInfo.careerYears() != null) {
+            experienceYears = careerInfo.careerYears();
+        }
 
-        profile.updateBasicInfo(education, "", experienceYears);
+        profile.updateBasicInfo(educationLevel, "", experienceYears);
     }
 
     private void updateSelfIntro(UserEntity user, UserProfileEntity profile,

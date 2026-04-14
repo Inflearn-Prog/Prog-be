@@ -83,24 +83,24 @@ public class UserMapper {
         );
 
         // 2. Career Info
-        List<CareerStatus> currentStatus = (profile != null && profile.getCurrentStatus() != null)
+        List<CareerStatus> currentStatuses = (profile != null && profile.getCurrentStatus() != null)
                 ? profile.getCurrentStatus() : List.of();
 
-        List<JobRole> targetJob = (profile != null && profile.getTargetJob() != null)
+        List<JobRole> targetJobRoles = (profile != null && profile.getTargetJob() != null)
                 ? profile.getTargetJob() : List.of();
 
-        String careerYear = "경력 없음";
+        String careerYears = "경력 없음";
         if (profile != null && profile.getExperienceYears() != null) {
-            careerYear = profile.getExperienceYears() == 0 ? "경력 없음" : profile.getExperienceYears() + "년차";
+            careerYears = profile.getExperienceYears() == 0 ? "경력 없음" : profile.getExperienceYears() + "년차";
         }
 
-        EducationLevel education = profile != null ? profile.getEducation() : null;
+        EducationLevel educationLevel = profile != null ? profile.getEducation() : null;
 
         UserProfileResponse.CareerInfo careerInfo = new UserProfileResponse.CareerInfo(
-                currentStatus,
-                targetJob,
-                careerYear,
-                education
+                currentStatuses,
+                targetJobRoles,
+                careerYears,
+                educationLevel
         );
 
         // 3. Self Intro

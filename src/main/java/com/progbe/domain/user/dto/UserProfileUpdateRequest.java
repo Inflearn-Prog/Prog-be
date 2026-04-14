@@ -22,10 +22,10 @@ public record UserProfileUpdateRequest(
     ) {}
 
     public record CareerInfo(
-            List<CareerStatus> currentStatus,
-            List<JobRole> targetJob,
-            Integer careerYear,
-            EducationLevel education
+            List<CareerStatus> currentStatuses,
+            List<JobRole> targetJobRoles,
+            Integer careerYears,
+            EducationLevel educationLevel
     ) {}
 
     public record SelfIntro(

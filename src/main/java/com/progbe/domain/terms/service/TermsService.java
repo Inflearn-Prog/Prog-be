@@ -58,25 +58,32 @@ public class TermsService {
             }
         }
 
-        // 2-1. 필수 약관 전체 동의 검증
+        // 2-1. 기존 동의 내역 조회
+        List<UserTermsAgreementEntity> existingAgreements = userTermsAgreementRepository
+                .findAllByUserIdAndIsAgreedTrueWithTerms(userId);
+        List<Long> alreadyAgreedTermIds = existingAgreements.stream()
+                .filter(a -> a.getWithdrawnAt() == null)
+                .map(a -> a.getTerms().getId())
+                .toList();
+
+        // 2-2. 필수 약관 전체 동의 검증 (이미 동의한 것 + 이번에 보낸 것 합산)
         boolean allRequiredAgreed = allTerms.stream()
                 .filter(TermsEntity::getRequired)
-                .allMatch(t -> agreedTermIds.contains(t.getId()));
+                .allMatch(t -> agreedTermIds.contains(t.getId()) || alreadyAgreedTermIds.contains(t.getId()));
         if (!allRequiredAgreed) {
             throw new CustomException(ErrorCode.REQUIRED_TERMS_NOT_AGREED);
         }
 
-        // 3. 약관 동의 내역 저장 (중복 체크 포함)
+        // 3. 약관 동의 내역 저장 (이미 동의한 약관은 스킵)
         for (Long termId : agreedTermIds) {
             TermsEntity term = termsMap.get(termId);
-            
-            // 기존 동의 내역 확인
+
             userTermsAgreementRepository.findByUserIdAndTermsId(userId, termId)
                     .ifPresentOrElse(
                             existingAgreement -> {
-                                // 이미 동의한 약관인 경우
+                                // 이미 유효한 동의가 있으면 스킵
                                 if (existingAgreement.getIsAgreed() && existingAgreement.getWithdrawnAt() == null) {
-                                    throw new CustomException(ErrorCode.TERMS_ALREADY_AGREED);
+                                    return;
                                 }
                                 // 철회했던 약관을 재동의하는 경우
                                 existingAgreement.reAgree();
@@ -89,7 +96,7 @@ public class TermsService {
                                         .isAgreed(true)
                                         .version(term.getUpdatedAt() != null ? term.getUpdatedAt() : LocalDateTime.now())
                                         .build();
-                                
+
                                 userTermsAgreementRepository.save(agreement);
                             }
                     );
