@@ -56,21 +56,19 @@ public class AdminPromptService {
         }
 
         AdminPromptRequest.UpdateFields updateFields = request.updateFields();
-        int totalUpdatedCount = 0;
 
         if (updateFields.categoryId() != null) {
             if (categoryRepository.findByIdAndNotDeleted(updateFields.categoryId()).isEmpty()) {
                 throw new CustomException(ErrorCode.INVALID_CATEGORY);
             }
-            totalUpdatedCount = promptRepository.bulkUpdateCategory(existingPromptIds, updateFields.categoryId());
+            promptRepository.bulkUpdateCategory(existingPromptIds, updateFields.categoryId());
         }
 
         if (updateFields.status() != null) {
-            int statusUpdatedCount = promptRepository.bulkUpdateStatus(existingPromptIds, updateFields.status());
-            totalUpdatedCount = Math.max(totalUpdatedCount, statusUpdatedCount);
+            promptRepository.bulkUpdateStatus(existingPromptIds, updateFields.status());
         }
 
-        return adminPromptMapper.toBulkUpdateResponse(totalUpdatedCount);
+        return adminPromptMapper.toBulkUpdateResponse(existingPromptIds.size());
     }
 
     @Transactional

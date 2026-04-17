@@ -2,6 +2,7 @@ package com.progbe.domain.prompt.service;
 
 import com.progbe.domain.prompt.dto.PromptCommentRequest;
 import com.progbe.domain.prompt.dto.PromptCommentResponse;
+import com.progbe.domain.prompt.entity.CommentStatus;
 import com.progbe.domain.prompt.entity.PromptCommentEntity;
 import com.progbe.domain.prompt.entity.PromptEntity;
 import com.progbe.domain.prompt.repository.PromptCommentRepository;
@@ -29,7 +30,7 @@ public class PromptCommentService {
     public PromptCommentResponse createComment(Long userId, Long promptId, PromptCommentRequest promptCommentRequest) {
         UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        PromptEntity promptEntity = promptRepository.findById(promptId).orElseThrow(() -> new CustomException(ErrorCode.PROMPT_NOT_FOUND));
+        PromptEntity promptEntity = promptRepository.findByIdAndNotDeleted(promptId).orElseThrow(() -> new CustomException(ErrorCode.PROMPT_NOT_FOUND));
 
         PromptCommentEntity promptCommentEntity = PromptCommentEntity.createFrom(promptEntity, userEntity, promptCommentRequest);
 
@@ -39,11 +40,14 @@ public class PromptCommentService {
     }
 
     public PromptCommentResponse createReply(Long userId, Long promptId, Long commentId, PromptCommentRequest promptCommentRequest) {
-        UserEntity userEntity = userRepository.findById(userId).orElseThrow();
+        UserEntity userEntity = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        PromptEntity promptEntity = promptRepository.findById(promptId).orElseThrow();
+        PromptEntity promptEntity = promptRepository.findByIdAndNotDeleted(promptId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PROMPT_NOT_FOUND));
 
-        PromptCommentEntity parentComment = promptCommentRepository.findById(commentId).orElseThrow();
+        PromptCommentEntity parentComment = promptCommentRepository.findById(commentId)
+                .orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
 
         if (parentComment.getParentId() != null) {
             throw new CustomException(ErrorCode.REPLY_DEPTH_LIMIT);
@@ -67,6 +71,10 @@ public class PromptCommentService {
                 () -> new CustomException(ErrorCode.COMMENT_NOT_FOUND)
         );
 
+        if (promptCommentEntity.getCommentStatus() == CommentStatus.DELETED) {
+            throw new CustomException(ErrorCode.COMMENT_NOT_FOUND);
+        }
+
         if (!promptCommentEntity.getUser().getId().equals(userId)) {
             throw new CustomException(ErrorCode.NOT_COMMENT_WRITER);
         }
@@ -76,8 +84,10 @@ public class PromptCommentService {
         return PromptCommentResponse.of(promptCommentEntity);
     }
 
+    @Transactional
     public void deleteComment(Long userId, Long commentId) {
-        PromptCommentEntity comment = promptCommentRepository.findByIdWithUser(commentId);
+        PromptCommentEntity comment = promptCommentRepository.findById(commentId)
+                .orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
 
         if (!comment.getUser().getId().equals(userId)) {
             throw new CustomException(ErrorCode.NOT_COMMENT_WRITER);

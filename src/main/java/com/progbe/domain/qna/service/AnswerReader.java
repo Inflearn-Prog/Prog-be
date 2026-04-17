@@ -12,6 +12,6 @@ public class AnswerReader {
     private final AnswerRepository answerRepository;
 
     public AnswerEntity readByQuestionId(Long questionId) {
-        return answerRepository.findByQuestionId(questionId).orElse(null);
+        return answerRepository.findByQuestionIdAndNotDeleted(questionId).orElse(null);
     }
 }

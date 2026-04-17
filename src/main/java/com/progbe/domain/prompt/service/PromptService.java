@@ -175,7 +175,7 @@ public class PromptService {
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        PromptEntity prompt = promptRepository.findById(promptId)
+        PromptEntity prompt = promptRepository.findByIdAndNotDeleted(promptId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PROMPT_NOT_FOUND));
 
         Optional<PromptLikeEntity> existingLike = promptLikeRepository.findByUserAndPrompt(user, prompt);

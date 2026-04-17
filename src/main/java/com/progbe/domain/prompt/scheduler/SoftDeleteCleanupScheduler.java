@@ -2,6 +2,8 @@ package com.progbe.domain.prompt.scheduler;
 
 import com.progbe.domain.prompt.repository.PromptCommentRepository;
 import com.progbe.domain.prompt.repository.PromptRepository;
+import com.progbe.domain.qna.repository.AnswerRepository;
+import com.progbe.domain.qna.repository.QuestionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -19,6 +21,8 @@ public class SoftDeleteCleanupScheduler {
 
     private final PromptRepository promptRepository;
     private final PromptCommentRepository promptCommentRepository;
+    private final AnswerRepository answerRepository;
+    private final QuestionRepository questionRepository;
 
     @Scheduled(cron = "0 0 4 * * *")
     @Transactional
@@ -32,6 +36,12 @@ public class SoftDeleteCleanupScheduler {
 
         int deletedPrompts = promptRepository.deleteAllByDeletedAtBefore(threshold);
         log.info("삭제된 프롬프트: {}건", deletedPrompts);
+
+        int deletedAnswers = answerRepository.deleteAllByDeletedAtBefore(threshold);
+        log.info("삭제된 답변: {}건", deletedAnswers);
+
+        int deletedQuestions = questionRepository.deleteAllByDeletedAtBefore(threshold);
+        log.info("삭제된 문의: {}건", deletedQuestions);
 
         log.info("Soft-deleted 데이터 물리 삭제 완료");
     }

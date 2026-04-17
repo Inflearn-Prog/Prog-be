@@ -26,10 +26,10 @@ public record UserProfileResponse(
     ) {}
 
     public record CareerInfo(
-            List<CareerStatus> currentStatus,
-            List<JobRole> targetJob,
-            String careerYear,
-            EducationLevel education
+            List<CareerStatus> currentStatuses,
+            List<JobRole> targetJobRoles,
+            String careerYears,
+            EducationLevel educationLevel
     ) {}
 
     public record SelfIntro(

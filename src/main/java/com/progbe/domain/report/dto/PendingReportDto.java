@@ -8,10 +8,10 @@ import java.time.LocalDateTime;
 public record PendingReportDto(
         Long reportId,
         LocalDateTime reportedAt,
-        ReportReason reasonCategory,
-        String targetPromptTitle,
+        ReportReason reason,
+        String targetTitle,
         String reporterNickname,
-        String reportContent,
+        String reasonContent,
         ReportStatus status
 ) {
 }

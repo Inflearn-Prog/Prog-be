@@ -2,6 +2,7 @@ package com.progbe.domain.qna.entity;
 
 import com.progbe.domain.qna.dto.QuestionRequest;
 import com.progbe.domain.user.entity.UserEntity;
+import com.progbe.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,7 +11,7 @@ import lombok.Builder;
 @Table(name = "question")
 @Builder
 @AllArgsConstructor
-public class QuestionEntity {
+public class QuestionEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
