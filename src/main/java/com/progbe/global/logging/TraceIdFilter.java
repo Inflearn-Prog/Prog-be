@@ -30,7 +30,7 @@ public class TraceIdFilter implements Filter {
             ((HttpServletResponse) response).setHeader(TRACE_ID_HEADER, traceId);
             chain.doFilter(request, response);
         } finally {
-            MDC.clear();
+            MDC.remove(TRACE_ID);
         }
     }
 }

@@ -20,9 +20,12 @@ import org.springframework.web.util.ContentCachingResponseWrapper;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static net.logstash.logback.argument.StructuredArguments.entries;
 
@@ -37,7 +40,7 @@ public class LoggingFilter implements Filter {
     private static final int MAX_BODY_LENGTH = 2000;
 
     private static final Set<String> EXCLUDED_PATHS = Set.of(
-            "/actuator/health", "/actuator/info", "/actuator/metrics", "/ping"
+            "/actuator/health", "/actuator/info", "/actuator/metrics", "/ping", "/health"
     );
     private static final Set<String> SENSITIVE_FIELDS = Set.of(
             "password", "token", "accesstoken", "refreshtoken", "authorization", "secret", "credential"
@@ -82,13 +85,17 @@ public class LoggingFilter implements Filter {
             entry.put("traceId", MDC.get(TraceIdFilter.TRACE_ID));
             entry.put("method", request.getMethod());
             entry.put("uri", request.getRequestURI());
-            entry.put("query", request.getQueryString());
+            entry.put("query", maskQueryString(request.getQueryString())); // 쿼리 마스킹
             entry.put("status", status);
             entry.put("durationMs", durationMs);
             entry.put("isSlow", isSlow);
             entry.put("clientIp", resolveClientIp(request));
             entry.put("requestBody", maskBody(request.getContentAsByteArray()));
-            entry.put("responseBody", truncate(new String(response.getContentAsByteArray()), MAX_BODY_LENGTH));
+            Object maskedResponse = maskBody(response.getContentAsByteArray());
+            String responseBodyStr = maskedResponse instanceof Map
+                    ? objectMapper.writeValueAsString(maskedResponse)
+                    : String.valueOf(maskedResponse);
+            entry.put("responseBody", truncate(responseBodyStr, MAX_BODY_LENGTH));
 
             // entries()로 Map 필드들을 Elasticsearch 루트 레벨에 직접 저장
             // (log.info("API {}", json) 방식은 message 문자열 안에 묻혀 Kibana에서 필드 쿼리 불가)
@@ -121,8 +128,33 @@ public class LoggingFilter implements Filter {
                 e.setValue("***");
             } else if (e.getValue() instanceof Map) {
                 maskMap((Map<String, Object>) e.getValue());
+            } else if (e.getValue() instanceof List) {
+                maskList((List<Object>) e.getValue());
             }
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void maskList(List<Object> list) {
+        for (Object item : list) {
+            if (item instanceof Map) {
+                maskMap((Map<String, Object>) item);
+            } else if (item instanceof List) {
+                maskList((List<Object>) item);
+            }
+        }
+    }
+
+    private String maskQueryString(String query) {
+        if (query == null || query.isBlank()) return query;
+        return Arrays.stream(query.split("&"))
+                .map(param -> {
+                    int eq = param.indexOf('=');
+                    if (eq < 0) return param;
+                    String key = param.substring(0, eq);
+                    return SENSITIVE_FIELDS.contains(key.toLowerCase()) ? key + "=***" : param;
+                })
+                .collect(Collectors.joining("&"));
     }
 
     private boolean isExcluded(String uri) {

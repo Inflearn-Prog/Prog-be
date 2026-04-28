@@ -29,7 +29,7 @@
         </root>
     </springProfile>
 
-    <!-- 로컬/테스트: 가독성 이쓴 포맷 + traceId  -->
+    <!-- 로컬/테스트: 가독성 있는 포맷 + traceId  -->
     <springProfile name="!prod">
         <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
             <encoder>

@@ -42,5 +42,6 @@ out/
 
 .env
 infra/
+docs/
 
 .claude
