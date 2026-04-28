@@ -41,5 +41,7 @@ out/
 .kotlin
 
 .env
+infra/
+docs/
 
 .claude
