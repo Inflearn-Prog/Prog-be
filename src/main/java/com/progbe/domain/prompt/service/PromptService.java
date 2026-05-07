@@ -8,7 +8,10 @@ import com.progbe.domain.prompt.entity.PromptLikeEntity;
 import com.progbe.domain.prompt.mapper.PromptMapper;
 import com.progbe.domain.prompt.repository.PromptLikeRepository;
 import com.progbe.domain.prompt.repository.PromptRepository;
+import com.progbe.domain.prompt.type.PromptStatus;
 import com.progbe.domain.user.entity.UserEntity;
+import com.progbe.domain.user.entity.UserProfileEntity;
+import com.progbe.domain.user.repository.UserProfileRepository;
 import com.progbe.domain.user.repository.UserRepository;
 import com.progbe.global.error.ErrorCode;
 import com.progbe.global.error.exception.CustomException;
@@ -33,6 +36,7 @@ public class PromptService {
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
     private final PromptLikeRepository promptLikeRepository;
+    private final UserProfileRepository userProfileRepository;
     private final PromptMapper promptMapper;
 
     /**
@@ -58,7 +62,11 @@ public class PromptService {
         );
 
         PromptEntity savedPrompt = promptRepository.save(prompt);
-        return promptMapper.toPromptResponse(savedPrompt);
+
+        String userDesc = userProfileRepository.findById(userId)
+                .map(UserProfileEntity::getBio).orElse(null);
+
+        return promptMapper.toPromptResponse(savedPrompt, userDesc, false, 0);
     }
 
     @Transactional(readOnly = true)
@@ -66,11 +74,11 @@ public class PromptService {
         PromptEntity prompt = promptRepository.findByIdAndNotDeleted(promptId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PROMPT_NOT_FOUND));
 
-        if (!prompt.getUser().getId().equals(userId)) {
+        if (prompt.getStatus() == PromptStatus.PRIVATE && !prompt.getUser().getId().equals(userId)) {
             throw new CustomException(ErrorCode.ACCESS_DENIED);
         }
 
-        return promptMapper.toPromptResponse(prompt);
+        return buildPromptResponse(prompt, userId);
     }
 
     @Transactional(readOnly = true)
@@ -100,7 +108,7 @@ public class PromptService {
         prompt.update(category, request.title(), request.content());
         PromptEntity updatedPrompt = promptRepository.save(prompt);
 
-        return promptMapper.toPromptResponse(updatedPrompt);
+        return buildPromptResponse(updatedPrompt, userId);
     }
 
     @Transactional
@@ -201,5 +209,14 @@ public class PromptService {
                         .toList(),
                 searchResult.getTotalElements()
         );
+    }
+
+    private PromptResponse buildPromptResponse(PromptEntity prompt, Long requestUserId) {
+        Long authorId = prompt.getUser().getId();
+        String userDesc = userProfileRepository.findById(authorId)
+                .map(UserProfileEntity::getBio).orElse(null);
+        boolean isLiked = promptLikeRepository.existsByUserIdAndPromptId(requestUserId, prompt.getId());
+        long likes = promptLikeRepository.countByPromptId(prompt.getId());
+        return promptMapper.toPromptResponse(prompt, userDesc, isLiked, likes);
     }
 }

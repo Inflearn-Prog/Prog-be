@@ -10,6 +10,11 @@ public record PromptResponse(
         CategoryResponse category,
         String title,
         String content,
+        String userName,
+        String userIcon,
+        String userDesc,
+        Boolean isLiked,
+        Integer likes,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {

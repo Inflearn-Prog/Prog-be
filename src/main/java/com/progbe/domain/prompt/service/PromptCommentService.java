@@ -7,6 +7,7 @@ import com.progbe.domain.prompt.entity.PromptCommentEntity;
 import com.progbe.domain.prompt.entity.PromptEntity;
 import com.progbe.domain.prompt.repository.PromptCommentRepository;
 import com.progbe.domain.prompt.repository.PromptRepository;
+import com.progbe.domain.prompt.type.PromptStatus;
 import com.progbe.domain.user.entity.UserEntity;
 import com.progbe.domain.user.repository.UserRepository;
 import com.progbe.global.error.ErrorCode;
@@ -32,6 +33,8 @@ public class PromptCommentService {
 
         PromptEntity promptEntity = promptRepository.findByIdAndNotDeleted(promptId).orElseThrow(() -> new CustomException(ErrorCode.PROMPT_NOT_FOUND));
 
+        validatePromptAccess(promptEntity, userId);
+
         PromptCommentEntity promptCommentEntity = PromptCommentEntity.createFrom(promptEntity, userEntity, promptCommentRequest);
 
         promptCommentRepository.save(promptCommentEntity);
@@ -45,6 +48,8 @@ public class PromptCommentService {
 
         PromptEntity promptEntity = promptRepository.findByIdAndNotDeleted(promptId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PROMPT_NOT_FOUND));
+
+        validatePromptAccess(promptEntity, userId);
 
         PromptCommentEntity parentComment = promptCommentRepository.findById(commentId)
                 .orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
@@ -96,9 +101,20 @@ public class PromptCommentService {
         comment.softDelete();
     }
 
-    public Slice<PromptCommentResponse> readComments(Long promptId) {
+    public Slice<PromptCommentResponse> readComments(Long promptId, Long userId) {
+        PromptEntity promptEntity = promptRepository.findByIdAndNotDeleted(promptId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PROMPT_NOT_FOUND));
+
+        validatePromptAccess(promptEntity, userId);
+
         Slice<PromptCommentEntity> commentEntitySlice = promptCommentRepository.findSliceAllByPromptId(promptId);
 
         return PromptCommentResponse.sliceOf(commentEntitySlice);
+    }
+
+    private void validatePromptAccess(PromptEntity prompt, Long userId) {
+        if (prompt.getStatus() == PromptStatus.PRIVATE && !prompt.getUser().getId().equals(userId)) {
+            throw new CustomException(ErrorCode.ACCESS_DENIED);
+        }
     }
 }
