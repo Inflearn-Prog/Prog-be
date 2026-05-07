@@ -113,8 +113,10 @@ public class PromptCommentService {
     }
 
     private void validatePromptAccess(PromptEntity prompt, Long userId) {
-        if (prompt.getStatus() == PromptStatus.PRIVATE && !prompt.getUser().getId().equals(userId)) {
-            throw new CustomException(ErrorCode.ACCESS_DENIED);
+        if (prompt.getStatus() == PromptStatus.PRIVATE) {
+            if (userId == null || !prompt.getUser().getId().equals(userId)) {
+                throw new CustomException(ErrorCode.ACCESS_DENIED);
+            }
         }
     }
 }

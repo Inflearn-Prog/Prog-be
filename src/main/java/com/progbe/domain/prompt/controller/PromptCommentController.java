@@ -72,7 +72,7 @@ public class PromptCommentController {
     public ApiResponse<Slice<PromptCommentResponse>> readComments(@AuthenticationPrincipal UserDetails userDetails,
                                                                   @PathVariable("promptId") Long promptId) {
         log.info("[댓글 읽기 API] : 요청");
-        Long userId = Long.parseLong(userDetails.getUsername());
+        Long userId = userDetails != null ? Long.parseLong(userDetails.getUsername()) : null;
         Slice<PromptCommentResponse> result = promptCommentService.readComments(promptId, userId);
         log.info("[댓글 읽기 API] : 완료");
         return ApiResponse.success(result);

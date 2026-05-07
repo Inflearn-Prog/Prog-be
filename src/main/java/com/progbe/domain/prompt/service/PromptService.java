@@ -74,8 +74,10 @@ public class PromptService {
         PromptEntity prompt = promptRepository.findByIdAndNotDeleted(promptId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PROMPT_NOT_FOUND));
 
-        if (prompt.getStatus() == PromptStatus.PRIVATE && !prompt.getUser().getId().equals(userId)) {
-            throw new CustomException(ErrorCode.ACCESS_DENIED);
+        if (prompt.getStatus() == PromptStatus.PRIVATE) {
+            if (userId == null || !prompt.getUser().getId().equals(userId)) {
+                throw new CustomException(ErrorCode.ACCESS_DENIED);
+            }
         }
 
         return buildPromptResponse(prompt, userId);
@@ -215,7 +217,8 @@ public class PromptService {
         Long authorId = prompt.getUser().getId();
         String userDesc = userProfileRepository.findById(authorId)
                 .map(UserProfileEntity::getBio).orElse(null);
-        boolean isLiked = promptLikeRepository.existsByUserIdAndPromptId(requestUserId, prompt.getId());
+        boolean isLiked = requestUserId != null
+                && promptLikeRepository.existsByUserIdAndPromptId(requestUserId, prompt.getId());
         long likes = promptLikeRepository.countByPromptId(prompt.getId());
         return promptMapper.toPromptResponse(prompt, userDesc, isLiked, likes);
     }

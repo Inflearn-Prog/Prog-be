@@ -51,7 +51,7 @@ public class PromptController {
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable Long promptId
     ) {
-        Long userId = Long.parseLong(userDetails.getUsername());
+        Long userId = userDetails != null ? Long.parseLong(userDetails.getUsername()) : null;
         PromptResponse response = promptService.getPrompt(promptId, userId);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
