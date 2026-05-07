@@ -4,6 +4,7 @@ import com.progbe.domain.prompt.entity.PromptCommentEntity;
 import com.progbe.domain.prompt.entity.PromptEntity;
 import com.progbe.domain.prompt.repository.PromptCommentRepository;
 import com.progbe.domain.prompt.repository.PromptRepository;
+import com.progbe.domain.prompt.type.PromptStatus;
 import com.progbe.domain.report.dto.ReportCreateRequest;
 import com.progbe.domain.report.dto.ReportCreateResponse;
 import com.progbe.domain.report.entity.ReportEntity;
@@ -60,6 +61,10 @@ public class ReportService {
         if (request.targetType() == TargetType.PROMPT) {
             PromptEntity prompt = promptRepository.findById(request.targetId())
                     .orElseThrow(() -> new CustomException(ErrorCode.PROMPT_NOT_FOUND));
+
+            if (prompt.getStatus() != PromptStatus.PUBLIC) {
+                throw new CustomException(ErrorCode.ACCESS_DENIED);
+            }
 
             if (prompt.getUser().getId().equals(reporterId)) {
                 throw new CustomException(ErrorCode.CANNOT_REPORT_SELF);

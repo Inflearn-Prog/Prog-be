@@ -34,13 +34,19 @@ public class PromptMapper {
         );
     }
 
-    public PromptResponse toPromptResponse(PromptEntity prompt) {
+    public PromptResponse toPromptResponse(PromptEntity prompt, String userDesc, boolean isLiked, long likes) {
+        UserEntity user = prompt.getUser();
         return new PromptResponse(
                 prompt.getId(),
-                prompt.getUser().getId(),
+                user.getId(),
                 toCategoryResponse(prompt.getCategory()),
                 prompt.getTitle(),
                 prompt.getContent(),
+                user.getNickname(),
+                user.getProfileUrl(),
+                userDesc,
+                isLiked,
+                (int) likes,
                 prompt.getCreatedAt(),
                 prompt.getUpdatedAt()
         );

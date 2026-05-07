@@ -69,9 +69,11 @@ public class PromptCommentController {
 
     // 댓글 읽기 (전체)
     @GetMapping("/{promptId}")
-    public ApiResponse<Slice<PromptCommentResponse>> readComments(@PathVariable("promptId") Long promptId) {
+    public ApiResponse<Slice<PromptCommentResponse>> readComments(@AuthenticationPrincipal UserDetails userDetails,
+                                                                  @PathVariable("promptId") Long promptId) {
         log.info("[댓글 읽기 API] : 요청");
-        Slice<PromptCommentResponse> result = promptCommentService.readComments(promptId);
+        Long userId = userDetails != null ? Long.parseLong(userDetails.getUsername()) : null;
+        Slice<PromptCommentResponse> result = promptCommentService.readComments(promptId, userId);
         log.info("[댓글 읽기 API] : 완료");
         return ApiResponse.success(result);
     }

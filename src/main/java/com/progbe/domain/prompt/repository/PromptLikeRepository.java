@@ -11,4 +11,8 @@ import java.util.Optional;
 @Repository
 public interface PromptLikeRepository extends JpaRepository<PromptLikeEntity, Long> {
     Optional<PromptLikeEntity> findByUserAndPrompt(UserEntity user, PromptEntity prompt);
+
+    boolean existsByUserIdAndPromptId(Long userId, Long promptId);
+
+    long countByPromptId(Long promptId);
 }
