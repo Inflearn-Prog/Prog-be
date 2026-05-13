@@ -69,7 +69,7 @@ class UserProfileServiceTest {
                 .user(testUser)
                 .currentStatus(List.of(CareerStatus.STUDENT))
                 .targetJob(List.of(JobRole.DEVELOPMENT))
-                .education(EducationLevel.BACHELOR_4)
+                .education(EducationLevel.BACHELOR)
                 .experienceYears(3)
                 .bio("자기소개입니다.")
                 .keywords(List.of("Java", "Spring"))
@@ -167,7 +167,7 @@ class UserProfileServiceTest {
             // given
             ReflectionTestUtils.setField(testUser, "registrationStatus", RegistrationStatus.NICKNAME_REGISTERED);
 
-            OnboardingBasicRequest request = new OnboardingBasicRequest(EducationLevel.BACHELOR_4, 3);
+            OnboardingBasicRequest request = new OnboardingBasicRequest(EducationLevel.BACHELOR, 3);
 
             OnboardingResponse expectedResponse = OnboardingResponse.builder()
                     .userId(USER_ID)
@@ -306,7 +306,7 @@ class UserProfileServiceTest {
                             List.of(CareerStatus.STUDENT),
                             List.of(JobRole.DEVELOPMENT),
                             "3년차",
-                            EducationLevel.BACHELOR_4
+                            EducationLevel.BACHELOR
                     ),
                     new UserProfileResponse.SelfIntro(
                             List.of("프로젝트 A 참여", "인턴십 B 수행"),
@@ -458,7 +458,7 @@ class UserProfileServiceTest {
             assertThat(testProfile.getExperienceYears()).isEqualTo(3);
             assertThat(testProfile.getCurrentStatus()).isEqualTo(List.of(CareerStatus.STUDENT));
             assertThat(testProfile.getTargetJob()).isEqualTo(List.of(JobRole.DEVELOPMENT));
-            assertThat(testProfile.getEducation()).isEqualTo(EducationLevel.BACHELOR_4);
+            assertThat(testProfile.getEducation()).isEqualTo(EducationLevel.BACHELOR);
         }
 
         @Test
