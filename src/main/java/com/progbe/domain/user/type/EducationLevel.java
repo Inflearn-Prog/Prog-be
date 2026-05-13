@@ -8,7 +8,7 @@ import lombok.Getter;
 public enum EducationLevel {
     HIGH_SCHOOL("고졸"),
     ASSOCIATE("초대졸"),
-    BACHELOR_4("4년제"),
+    BACHELOR("4년제"),
     MASTER("석사"),
     DOCTOR("박사");
 
