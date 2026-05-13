@@ -49,8 +49,9 @@ public interface PromptRepository extends JpaRepository<PromptEntity, Long> {
     @Query("SELECT p FROM PromptEntity p " +
             "JOIN FETCH p.category " +
             "WHERE p.deletedAt IS NULL AND p.status = 'PUBLIC' " +
+            "AND (:categoryId IS NULL OR p.category.id = :categoryId) " +
             "ORDER BY p.createdAt DESC")
-    Page<PromptEntity> findPromptSortedTime(Pageable pageable);
+    Page<PromptEntity> findPromptSortedTime(@Param("categoryId") Long categoryId, Pageable pageable);
 
     @Query("SELECT p FROM PromptEntity p " +
             "JOIN FETCH p.category " +

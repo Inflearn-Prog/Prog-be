@@ -57,7 +57,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(WHITELIST).permitAll()
                         .requestMatchers(HttpMethod.GET,
-                                "/prompts",
                                 "/prompts/{promptId}",
                                 "/prompts/createDesc",
                                 "/prompts/likeDesc",

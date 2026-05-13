@@ -127,8 +127,9 @@ public class PromptService {
     }
 
     // 최신순 프롬프트 띄어주기 로직 (#31)
-    public PromptListResponse getPromptsSortedTime(Pageable pageable) {
-        Page<PromptEntity> promptEntities = promptRepository.findPromptSortedTime(pageable);
+    @Transactional(readOnly = true)
+    public PromptListResponse getPromptsSortedTime(Long categoryId, Pageable pageable) {
+        Page<PromptEntity> promptEntities = promptRepository.findPromptSortedTime(categoryId, pageable);
 
         List<PromptSummaryResponse> promptList = promptEntities.getContent().stream()
                 .map(entity -> new PromptSummaryResponse(
@@ -147,6 +148,7 @@ public class PromptService {
     }
 
     // 좋아요순 프롬프트 띄어주기 로직 (#31)
+    @Transactional(readOnly = true)
     public PromptListResponse getPromptsSortedLikeCount(Pageable pageable) {
         Page<PromptEntity> promptEntities = promptRepository.findPromptSortedLikeCount(pageable);
 
@@ -168,6 +170,7 @@ public class PromptService {
 
     // 오늘의 좋아요를 가장 많이 받은 프롬프트 띄어주기 로직 (#31)
     // LocalDateTime 을 이용해서 오늘 (= 00시 ~ 23시 59분) 으로 설정했습니다.
+    @Transactional(readOnly = true)
     public List<PromptSummaryResponse> getDailyHotPrompts() {
         LocalDateTime start = LocalDate.now().atStartOfDay();
         LocalDateTime end = LocalDateTime.of(LocalDate.now(), LocalTime.MAX);
@@ -202,6 +205,7 @@ public class PromptService {
     }
 
     // 프롬프트 검색 로직 (#33)
+    @Transactional(readOnly = true)
     public PromptListResponse searchPromptsByTitle(String keyword, Pageable pageable) {
         Page<PromptEntity> searchResult = promptRepository.findByTitleContaining(keyword, pageable);
 
