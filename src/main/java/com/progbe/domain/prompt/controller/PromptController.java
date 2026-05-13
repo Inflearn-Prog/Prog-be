@@ -3,6 +3,8 @@ package com.progbe.domain.prompt.controller;
 import com.progbe.domain.prompt.dto.*;
 import com.progbe.domain.prompt.service.PromptService;
 import com.progbe.global.common.ApiResponse;
+import com.progbe.global.error.ErrorCode;
+import com.progbe.global.error.exception.CustomException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -116,8 +118,15 @@ public class PromptController {
      */
     @GetMapping("/createDesc")
     public ApiResponse<PromptListResponse> createPromptDesc(
+            @RequestParam(defaultValue = "all") String category,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        PromptListResponse prompts = promptService.getPromptsSortedTime(pageable);
+        Long categoryId;
+        try {
+            categoryId = "all".equalsIgnoreCase(category) ? null : Long.parseLong(category);
+        } catch (NumberFormatException e) {
+            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE);
+        }
+        PromptListResponse prompts = promptService.getPromptsSortedTime(categoryId, pageable);
         return ApiResponse.success(prompts);
     }
 
