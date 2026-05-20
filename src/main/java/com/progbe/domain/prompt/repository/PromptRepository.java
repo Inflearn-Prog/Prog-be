@@ -23,7 +23,7 @@ public interface PromptRepository extends JpaRepository<PromptEntity, Long> {
     @Query("SELECT p FROM PromptEntity p WHERE p.user.id = :userId AND p.deletedAt IS NULL ORDER BY p.createdAt DESC")
     List<PromptEntity> findAllByUserIdAndNotDeleted(@Param("userId") Long userId);
 
-    @Query("SELECT p FROM PromptEntity p WHERE p.user.id = :userId AND p.deletedAt IS NULL ORDER BY p.createdAt DESC")
+    @Query("SELECT p FROM PromptEntity p JOIN FETCH p.user WHERE p.user.id = :userId AND p.deletedAt IS NULL ORDER BY p.createdAt DESC")
     Page<PromptEntity> findAllByUserIdAndNotDeleted(@Param("userId") Long userId, Pageable pageable);
 
     @Query("SELECT COUNT(p) FROM PromptEntity p WHERE p.user.id = :userId AND p.deletedAt IS NULL")
@@ -47,34 +47,39 @@ public interface PromptRepository extends JpaRepository<PromptEntity, Long> {
     int bulkSoftDelete(@Param("promptIds") List<Long> promptIds, @Param("deletedAt") LocalDateTime deletedAt, @Param("status") PromptStatus status);
 
     @Query("SELECT p FROM PromptEntity p " +
+            "JOIN FETCH p.user " +
             "JOIN FETCH p.category " +
             "WHERE p.deletedAt IS NULL AND p.status = 'PUBLIC' " +
             "AND (:categoryId IS NULL OR p.category.id = :categoryId) " +
             "ORDER BY p.createdAt DESC")
     Page<PromptEntity> findPromptSortedTime(@Param("categoryId") Long categoryId, Pageable pageable);
 
-    @Query("SELECT p FROM PromptEntity p " +
+    @Query(value = "SELECT p FROM PromptEntity p " +
+            "JOIN FETCH p.user " +
             "JOIN FETCH p.category " +
             "LEFT JOIN PromptLikeEntity pl ON pl.prompt = p " +
             "WHERE p.deletedAt IS NULL AND p.status = 'PUBLIC' " +
-            "GROUP BY p.id, p.category.id " +
-            "ORDER BY COUNT(pl) DESC, p.createdAt DESC")
+            "GROUP BY p.id, p.user.id, p.category.id " +
+            "ORDER BY COUNT(pl) DESC, p.createdAt DESC",
+            countQuery = "SELECT COUNT(DISTINCT p.id) FROM PromptEntity p " +
+            "WHERE p.deletedAt IS NULL AND p.status = 'PUBLIC'")
     Page<PromptEntity> findPromptSortedLikeCount(Pageable pageable);
 
     @Query("SELECT p FROM PromptEntity p " +
+            "JOIN FETCH p.user " +
             "JOIN FETCH p.category " +
             "WHERE p.title LIKE %:keyword% " +
             "AND p.deletedAt IS NULL AND p.status = 'PUBLIC' " +
             "ORDER BY p.createdAt DESC")
     Page<PromptEntity> findByTitleContaining(@Param("keyword") String keyword, Pageable pageable);
 
-
     @Query("SELECT p FROM PromptEntity p " +
+            "JOIN FETCH p.user " +
             "JOIN FETCH p.category " +
             "LEFT JOIN PromptLikeEntity pl ON pl.prompt = p " +
             "AND pl.createdAt >= :start AND pl.createdAt <= :end " +
             "WHERE p.deletedAt IS NULL AND p.status = 'PUBLIC' " +
-            "GROUP BY p.id, p.category.id " +
+            "GROUP BY p.id, p.user.id, p.category.id " +
             "ORDER BY COUNT(pl) DESC, p.createdAt DESC")
     List<PromptEntity> findDailyHotPrompts(
             @Param("start") LocalDateTime start,

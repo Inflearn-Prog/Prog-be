@@ -118,15 +118,17 @@ public class PromptController {
      */
     @GetMapping("/createDesc")
     public ApiResponse<PromptListResponse> createPromptDesc(
+            @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(defaultValue = "all") String category,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        Long userId = userDetails != null ? Long.parseLong(userDetails.getUsername()) : null;
         Long categoryId;
         try {
             categoryId = "all".equalsIgnoreCase(category) ? null : Long.parseLong(category);
         } catch (NumberFormatException e) {
             throw new CustomException(ErrorCode.INVALID_INPUT_VALUE);
         }
-        PromptListResponse prompts = promptService.getPromptsSortedTime(categoryId, pageable);
+        PromptListResponse prompts = promptService.getPromptsSortedTime(categoryId, userId, pageable);
         return ApiResponse.success(prompts);
     }
 
@@ -137,8 +139,10 @@ public class PromptController {
      */
     @GetMapping("/likeDesc")
     public ApiResponse<PromptListResponse> likePromptDesc(
+            @AuthenticationPrincipal UserDetails userDetails,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        PromptListResponse prompts = promptService.getPromptsSortedLikeCount(pageable);
+        Long userId = userDetails != null ? Long.parseLong(userDetails.getUsername()) : null;
+        PromptListResponse prompts = promptService.getPromptsSortedLikeCount(userId, pageable);
         return ApiResponse.success(prompts);
     }
 
@@ -147,8 +151,10 @@ public class PromptController {
      * @return
      */
     @GetMapping("/today-hot")
-    public ApiResponse<List<PromptSummaryResponse>> getTodayHotPrompts() {
-        List<PromptSummaryResponse> prompts = promptService.getDailyHotPrompts();
+    public ApiResponse<List<PromptSummaryResponse>> getTodayHotPrompts(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = userDetails != null ? Long.parseLong(userDetails.getUsername()) : null;
+        List<PromptSummaryResponse> prompts = promptService.getDailyHotPrompts(userId);
         return ApiResponse.success(prompts);
     }
 
@@ -173,8 +179,12 @@ public class PromptController {
      * @return
      */
     @GetMapping("/search/{keyword}")
-    public ApiResponse<PromptListResponse> searchPrompts(@PathVariable("keyword") String keyword, Pageable pageable) {
-        PromptListResponse promptListResponse = promptService.searchPromptsByTitle(keyword, pageable);
+    public ApiResponse<PromptListResponse> searchPrompts(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable("keyword") String keyword,
+            Pageable pageable) {
+        Long userId = userDetails != null ? Long.parseLong(userDetails.getUsername()) : null;
+        PromptListResponse promptListResponse = promptService.searchPromptsByTitle(keyword, userId, pageable);
         return ApiResponse.success(promptListResponse);
     }
 }

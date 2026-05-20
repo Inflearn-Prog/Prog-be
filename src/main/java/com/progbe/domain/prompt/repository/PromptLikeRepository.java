@@ -4,8 +4,11 @@ import com.progbe.domain.prompt.entity.PromptEntity;
 import com.progbe.domain.prompt.entity.PromptLikeEntity;
 import com.progbe.domain.user.entity.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -15,4 +18,7 @@ public interface PromptLikeRepository extends JpaRepository<PromptLikeEntity, Lo
     boolean existsByUserIdAndPromptId(Long userId, Long promptId);
 
     long countByPromptId(Long promptId);
+
+    @Query("SELECT pl.prompt.id FROM PromptLikeEntity pl WHERE pl.user.id = :userId AND pl.prompt.id IN :promptIds")
+    List<Long> findLikedPromptIdsByUserId(@Param("userId") Long userId, @Param("promptIds") List<Long> promptIds);
 }
