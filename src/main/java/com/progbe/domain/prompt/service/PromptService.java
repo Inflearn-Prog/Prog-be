@@ -25,8 +25,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -86,7 +89,8 @@ public class PromptService {
     @Transactional(readOnly = true)
     public PromptListResponse getPromptList(Long userId, Pageable pageable) {
         Page<PromptEntity> promptPage = promptRepository.findAllByUserIdAndNotDeleted(userId, pageable);
-        List<PromptSummaryResponse> promptSummaries = promptMapper.toPromptSummaryResponseList(promptPage.getContent());
+        Set<Long> likedIds = getLikedPromptIds(userId, promptPage.getContent());
+        List<PromptSummaryResponse> promptSummaries = promptMapper.toPromptSummaryResponseList(promptPage.getContent(), likedIds);
         long totalCount = promptPage.getTotalElements();
 
         return new PromptListResponse(promptSummaries, totalCount);
@@ -128,18 +132,11 @@ public class PromptService {
 
     // 최신순 프롬프트 띄어주기 로직 (#31)
     @Transactional(readOnly = true)
-    public PromptListResponse getPromptsSortedTime(Long categoryId, Pageable pageable) {
+    public PromptListResponse getPromptsSortedTime(Long categoryId, Long userId, Pageable pageable) {
         Page<PromptEntity> promptEntities = promptRepository.findPromptSortedTime(categoryId, pageable);
+        Set<Long> likedIds = getLikedPromptIds(userId, promptEntities.getContent());
 
-        List<PromptSummaryResponse> promptList = promptEntities.getContent().stream()
-                .map(entity -> new PromptSummaryResponse(
-                        entity.getId(),
-                        promptMapper.toCategoryResponse(entity.getCategory()),
-                        entity.getTitle(),
-                        entity.getCreatedAt(),
-                        entity.getUpdatedAt()
-                ))
-                .toList();
+        List<PromptSummaryResponse> promptList = promptMapper.toPromptSummaryResponseList(promptEntities.getContent(), likedIds);
 
         return new PromptListResponse(
                 promptList,
@@ -149,18 +146,11 @@ public class PromptService {
 
     // 좋아요순 프롬프트 띄어주기 로직 (#31)
     @Transactional(readOnly = true)
-    public PromptListResponse getPromptsSortedLikeCount(Pageable pageable) {
+    public PromptListResponse getPromptsSortedLikeCount(Long userId, Pageable pageable) {
         Page<PromptEntity> promptEntities = promptRepository.findPromptSortedLikeCount(pageable);
+        Set<Long> likedIds = getLikedPromptIds(userId, promptEntities.getContent());
 
-        List<PromptSummaryResponse> promptList = promptEntities.getContent().stream()
-                .map(entity -> new PromptSummaryResponse(
-                        entity.getId(),
-                        promptMapper.toCategoryResponse(entity.getCategory()),
-                        entity.getTitle(),
-                        entity.getCreatedAt(),
-                        entity.getUpdatedAt()
-                ))
-                .toList();
+        List<PromptSummaryResponse> promptList = promptMapper.toPromptSummaryResponseList(promptEntities.getContent(), likedIds);
 
         return new PromptListResponse(
                 promptList,
@@ -171,19 +161,21 @@ public class PromptService {
     // 오늘의 좋아요를 가장 많이 받은 프롬프트 띄어주기 로직 (#31)
     // LocalDateTime 을 이용해서 오늘 (= 00시 ~ 23시 59분) 으로 설정했습니다.
     @Transactional(readOnly = true)
-    public List<PromptSummaryResponse> getDailyHotPrompts() {
+    public List<PromptSummaryResponse> getDailyHotPrompts(Long userId) {
         LocalDateTime start = LocalDate.now().atStartOfDay();
         LocalDateTime end = LocalDateTime.of(LocalDate.now(), LocalTime.MAX);
 
-        Pageable topFive = PageRequest.of(0, 3);
+        Pageable topFive = PageRequest.of(0, 5);
 
         List<PromptEntity> promptEntities = promptRepository.findDailyHotPrompts(start, end, topFive);
+        Set<Long> likedIds = getLikedPromptIds(userId, promptEntities);
 
-        return promptMapper.toPromptSummaryResponseList(promptEntities);
+        return promptMapper.toPromptSummaryResponseList(promptEntities, likedIds);
     }
 
     // 좋아요 생성 (#32)
     // 좋아요 눌렀는지를 확인하기 위해 null 값이 허용되는 Optional 전략 사용
+    @Transactional
     public PromptLikeResponse likePrompt(Long promptId, Long userId) {
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -206,15 +198,22 @@ public class PromptService {
 
     // 프롬프트 검색 로직 (#33)
     @Transactional(readOnly = true)
-    public PromptListResponse searchPromptsByTitle(String keyword, Pageable pageable) {
+    public PromptListResponse searchPromptsByTitle(String keyword, Long userId, Pageable pageable) {
         Page<PromptEntity> searchResult = promptRepository.findByTitleContaining(keyword, pageable);
+        Set<Long> likedIds = getLikedPromptIds(userId, searchResult.getContent());
 
         return new PromptListResponse(
-                searchResult.getContent().stream()
-                        .map(PromptSummaryResponse::of)
-                        .toList(),
+                promptMapper.toPromptSummaryResponseList(searchResult.getContent(), likedIds),
                 searchResult.getTotalElements()
         );
+    }
+
+    private Set<Long> getLikedPromptIds(Long userId, List<PromptEntity> prompts) {
+        if (userId == null || prompts.isEmpty()) {
+            return Collections.emptySet();
+        }
+        List<Long> promptIds = prompts.stream().map(PromptEntity::getId).toList();
+        return new HashSet<>(promptLikeRepository.findLikedPromptIdsByUserId(userId, promptIds));
     }
 
     private PromptResponse buildPromptResponse(PromptEntity prompt, Long requestUserId) {

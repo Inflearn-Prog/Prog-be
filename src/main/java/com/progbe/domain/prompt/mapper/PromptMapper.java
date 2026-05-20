@@ -9,6 +9,7 @@ import com.progbe.domain.user.entity.UserEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -52,19 +53,23 @@ public class PromptMapper {
         );
     }
 
-    public PromptSummaryResponse toPromptSummaryResponse(PromptEntity prompt) {
+    public PromptSummaryResponse toPromptSummaryResponse(PromptEntity prompt, boolean isLiked) {
+        UserEntity user = prompt.getUser();
         return new PromptSummaryResponse(
                 prompt.getId(),
+                user.getId(),
+                user.getNickname(),
                 toCategoryResponse(prompt.getCategory()),
                 prompt.getTitle(),
                 prompt.getCreatedAt(),
-                prompt.getUpdatedAt()
+                prompt.getUpdatedAt(),
+                isLiked
         );
     }
 
-    public List<PromptSummaryResponse> toPromptSummaryResponseList(List<PromptEntity> prompts) {
+    public List<PromptSummaryResponse> toPromptSummaryResponseList(List<PromptEntity> prompts, Set<Long> likedPromptIds) {
         return prompts.stream()
-                .map(this::toPromptSummaryResponse)
+                .map(p -> toPromptSummaryResponse(p, likedPromptIds.contains(p.getId())))
                 .collect(Collectors.toList());
     }
 }
