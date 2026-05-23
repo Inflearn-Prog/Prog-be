@@ -146,8 +146,8 @@ public class PromptService {
 
     // 좋아요순 프롬프트 띄어주기 로직 (#31)
     @Transactional(readOnly = true)
-    public PromptListResponse getPromptsSortedLikeCount(Long userId, Pageable pageable) {
-        Page<PromptEntity> promptEntities = promptRepository.findPromptSortedLikeCount(pageable);
+    public PromptListResponse getPromptsSortedLikeCount(Long categoryId, Long userId, Pageable pageable) {
+        Page<PromptEntity> promptEntities = promptRepository.findPromptSortedLikeCount(categoryId, pageable);
         Set<Long> likedIds = getLikedPromptIds(userId, promptEntities.getContent());
 
         List<PromptSummaryResponse> promptList = promptMapper.toPromptSummaryResponseList(promptEntities.getContent(), likedIds);

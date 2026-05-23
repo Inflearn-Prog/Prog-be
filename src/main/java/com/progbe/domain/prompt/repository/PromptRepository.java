@@ -59,11 +59,13 @@ public interface PromptRepository extends JpaRepository<PromptEntity, Long> {
             "JOIN FETCH p.category " +
             "LEFT JOIN PromptLikeEntity pl ON pl.prompt = p " +
             "WHERE p.deletedAt IS NULL AND p.status = 'PUBLIC' " +
+            "AND (:categoryId IS NULL OR p.category.id = :categoryId) " +
             "GROUP BY p.id, p.user.id, p.category.id " +
             "ORDER BY COUNT(pl) DESC, p.createdAt DESC",
             countQuery = "SELECT COUNT(DISTINCT p.id) FROM PromptEntity p " +
-            "WHERE p.deletedAt IS NULL AND p.status = 'PUBLIC'")
-    Page<PromptEntity> findPromptSortedLikeCount(Pageable pageable);
+            "WHERE p.deletedAt IS NULL AND p.status = 'PUBLIC' " +
+            "AND (:categoryId IS NULL OR p.category.id = :categoryId)")
+    Page<PromptEntity> findPromptSortedLikeCount(@Param("categoryId") Long categoryId, Pageable pageable);
 
     @Query("SELECT p FROM PromptEntity p " +
             "JOIN FETCH p.user " +
