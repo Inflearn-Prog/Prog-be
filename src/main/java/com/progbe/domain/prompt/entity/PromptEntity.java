@@ -99,4 +99,8 @@ public class PromptEntity {
     public void updateCategory(CategoryEntity category) {
         this.category = category;
     }
+
+    public String getContentSummary() {
+        return content.length() > 70 ? content.substring(0, 70) + "..." : content;
+    }
 }

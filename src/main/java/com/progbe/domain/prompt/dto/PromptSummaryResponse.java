@@ -10,6 +10,7 @@ public record PromptSummaryResponse(
         String nickname,
         CategoryResponse category,
         String title,
+        String contentSummary,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
         boolean isLiked

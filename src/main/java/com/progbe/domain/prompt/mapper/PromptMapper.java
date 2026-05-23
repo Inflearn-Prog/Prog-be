@@ -61,6 +61,7 @@ public class PromptMapper {
                 user.getNickname(),
                 toCategoryResponse(prompt.getCategory()),
                 prompt.getTitle(),
+                prompt.getContentSummary(),
                 prompt.getCreatedAt(),
                 prompt.getUpdatedAt(),
                 isLiked
