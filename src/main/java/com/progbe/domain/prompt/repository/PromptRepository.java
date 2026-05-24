@@ -23,7 +23,8 @@ public interface PromptRepository extends JpaRepository<PromptEntity, Long> {
     @Query("SELECT p FROM PromptEntity p WHERE p.user.id = :userId AND p.deletedAt IS NULL ORDER BY p.createdAt DESC")
     List<PromptEntity> findAllByUserIdAndNotDeleted(@Param("userId") Long userId);
 
-    @Query("SELECT p FROM PromptEntity p JOIN FETCH p.user WHERE p.user.id = :userId AND p.deletedAt IS NULL ORDER BY p.createdAt DESC")
+    @Query(value = "SELECT p FROM PromptEntity p JOIN FETCH p.user JOIN FETCH p.category WHERE p.user.id = :userId AND p.deletedAt IS NULL ORDER BY p.createdAt DESC",
+            countQuery = "SELECT COUNT(p) FROM PromptEntity p WHERE p.user.id = :userId AND p.deletedAt IS NULL")
     Page<PromptEntity> findAllByUserIdAndNotDeleted(@Param("userId") Long userId, Pageable pageable);
 
     @Query("SELECT COUNT(p) FROM PromptEntity p WHERE p.user.id = :userId AND p.deletedAt IS NULL")
