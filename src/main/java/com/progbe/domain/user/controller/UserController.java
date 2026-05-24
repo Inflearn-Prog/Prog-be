@@ -1,5 +1,7 @@
 package com.progbe.domain.user.controller;
 
+import com.progbe.domain.prompt.dto.PromptListResponse;
+import com.progbe.domain.prompt.service.PromptService;
 import com.progbe.domain.terms.dto.*;
 import com.progbe.domain.terms.service.TermsService;
 import com.progbe.domain.user.dto.*;
@@ -8,6 +10,8 @@ import com.progbe.domain.user.service.UserService;
 import com.progbe.global.common.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +24,7 @@ public class UserController {
     private final TermsService termsService;
     private final UserService userService;
     private final UserProfileService userProfileService;
+    private final PromptService promptService;
 
     @PostMapping("/terms-agreement")
     public ApiResponse<TermsAgreementResponse> agreeTerms(
@@ -114,6 +119,17 @@ public class UserController {
     ) {
         Long userId = Long.parseLong(userDetails.getUsername());
         NicknameRegisterResponse response = userProfileService.registerNickname(userId, request.nickname());
+        return ApiResponse.success(response);
+    }
+
+    @GetMapping("/{userId}/liked")
+    public ApiResponse<PromptListResponse> getLikedPrompts(
+            @PathVariable Long userId,
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PageableDefault(size = 4) Pageable pageable
+    ) {
+        Long requestUserId = Long.parseLong(userDetails.getUsername());
+        PromptListResponse response = promptService.getLikedPromptsByUser(userId, requestUserId, pageable);
         return ApiResponse.success(response);
     }
 }

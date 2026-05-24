@@ -208,6 +208,22 @@ public class PromptService {
         );
     }
 
+    @Transactional(readOnly = true)
+    public PromptListResponse getLikedPromptsByUser(Long targetUserId, Long requestUserId, Pageable pageable) {
+        userRepository.findById(targetUserId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        if (!targetUserId.equals(requestUserId)) {
+            throw new CustomException(ErrorCode.ACCESS_DENIED);
+        }
+
+        Page<PromptEntity> promptPage = promptLikeRepository.findLikedPromptsByUserId(targetUserId, pageable);
+        Set<Long> likedIds = getLikedPromptIds(requestUserId, promptPage.getContent());
+        List<PromptSummaryResponse> summaries = promptMapper.toPromptSummaryResponseList(promptPage.getContent(), likedIds);
+
+        return new PromptListResponse(summaries, promptPage.getTotalElements());
+    }
+
     private Set<Long> getLikedPromptIds(Long userId, List<PromptEntity> prompts) {
         if (userId == null || prompts.isEmpty()) {
             return Collections.emptySet();
