@@ -140,9 +140,11 @@ public class PromptController {
     @GetMapping("/likeDesc")
     public ApiResponse<PromptListResponse> likePromptDesc(
             @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(defaultValue = "all") String category,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         Long userId = userDetails != null ? Long.parseLong(userDetails.getUsername()) : null;
-        PromptListResponse prompts = promptService.getPromptsSortedLikeCount(userId, pageable);
+        Long categoryId = "all".equalsIgnoreCase(category) ? null : Long.parseLong(category);
+        PromptListResponse prompts = promptService.getPromptsSortedLikeCount(categoryId, userId, pageable);
         return ApiResponse.success(prompts);
     }
 
