@@ -29,11 +29,11 @@ public interface PromptLikeRepository extends JpaRepository<PromptLikeEntity, Lo
             "JOIN FETCH p.category " +
             "JOIN PromptLikeEntity pl ON pl.prompt = p " +
             "WHERE pl.user.id = :userId " +
-            "AND p.deletedAt IS NULL AND p.status <> 'DELETED' " +
+            "AND p.deletedAt IS NULL AND p.status = 'PUBLIC' " +
             "ORDER BY pl.createdAt DESC",
             countQuery = "SELECT COUNT(p) FROM PromptEntity p " +
             "JOIN PromptLikeEntity pl ON pl.prompt = p " +
             "WHERE pl.user.id = :userId " +
-            "AND p.deletedAt IS NULL AND p.status <> 'DELETED'")
+            "AND p.deletedAt IS NULL AND p.status = 'PUBLIC'")
     Page<PromptEntity> findLikedPromptsByUserId(@Param("userId") Long userId, Pageable pageable);
 }
