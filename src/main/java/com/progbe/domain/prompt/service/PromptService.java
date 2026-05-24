@@ -224,6 +224,24 @@ public class PromptService {
         return new PromptListResponse(summaries, promptPage.getTotalElements());
     }
 
+    @Transactional(readOnly = true)
+    public PromptListResponse getPromptsByUser(Long targetUserId, Long requestUserId, Pageable pageable) {
+        userRepository.findById(targetUserId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        Page<PromptEntity> promptPage;
+        if (targetUserId.equals(requestUserId)) {
+            promptPage = promptRepository.findAllByUserIdAndNotDeleted(targetUserId, pageable);
+        } else {
+            promptPage = promptRepository.findPublicByUserIdAndNotDeleted(targetUserId, pageable);
+        }
+
+        Set<Long> likedIds = getLikedPromptIds(requestUserId, promptPage.getContent());
+        List<PromptSummaryResponse> summaries = promptMapper.toPromptSummaryResponseList(promptPage.getContent(), likedIds);
+
+        return new PromptListResponse(summaries, promptPage.getTotalElements());
+    }
+
     private Set<Long> getLikedPromptIds(Long userId, List<PromptEntity> prompts) {
         if (userId == null || prompts.isEmpty()) {
             return Collections.emptySet();

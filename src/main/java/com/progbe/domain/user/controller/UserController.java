@@ -132,4 +132,15 @@ public class UserController {
         PromptListResponse response = promptService.getLikedPromptsByUser(userId, requestUserId, pageable);
         return ApiResponse.success(response);
     }
+
+    @GetMapping("/{userId}/prompts")
+    public ApiResponse<PromptListResponse> getUserPrompts(
+            @PathVariable Long userId,
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PageableDefault(size = 4) Pageable pageable
+    ) {
+        Long requestUserId = Long.parseLong(userDetails.getUsername());
+        PromptListResponse response = promptService.getPromptsByUser(userId, requestUserId, pageable);
+        return ApiResponse.success(response);
+    }
 }
