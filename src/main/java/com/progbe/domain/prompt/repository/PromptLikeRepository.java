@@ -1,5 +1,6 @@
 package com.progbe.domain.prompt.repository;
 
+import com.progbe.domain.prompt.dto.PromptLikeCountDto;
 import com.progbe.domain.prompt.entity.PromptEntity;
 import com.progbe.domain.prompt.entity.PromptLikeEntity;
 import com.progbe.domain.user.entity.UserEntity;
@@ -33,9 +34,9 @@ public interface PromptLikeRepository extends JpaRepository<PromptLikeEntity, Lo
             "AND (p.user.id = :userId OR p.status = 'PUBLIC') " +
             "ORDER BY pl.createdAt DESC",
             countQuery = "SELECT COUNT(p) FROM PromptEntity p " +
-            "JOIN PromptLikeEntity pl ON pl.prompt = p " +
-            "WHERE pl.user.id = :userId " +
-            "AND p.deletedAt IS NULL AND p.status <> 'DELETED' " +
-            "AND (p.user.id = :userId OR p.status = 'PUBLIC')")
+                    "JOIN PromptLikeEntity pl ON pl.prompt = p " +
+                    "WHERE pl.user.id = :userId " +
+                    "AND p.deletedAt IS NULL AND p.status <> 'DELETED' " +
+                    "AND (p.user.id = :userId OR p.status = 'PUBLIC')")
     Page<PromptEntity> findLikedPromptsByUserId(@Param("userId") Long userId, Pageable pageable);
 }
