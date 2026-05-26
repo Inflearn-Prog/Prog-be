@@ -28,8 +28,10 @@ import java.time.LocalTime;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -89,11 +91,12 @@ public class PromptService {
     @Transactional(readOnly = true)
     public PromptListResponse getPromptList(Long userId, Pageable pageable) {
         Page<PromptEntity> promptPage = promptRepository.findAllByUserIdAndNotDeleted(userId, pageable);
-        Set<Long> likedIds = getLikedPromptIds(userId, promptPage.getContent());
-        List<PromptSummaryResponse> promptSummaries = promptMapper.toPromptSummaryResponseList(promptPage.getContent(), likedIds);
-        long totalCount = promptPage.getTotalElements();
+        List<PromptEntity> prompts = promptPage.getContent();
+        Set<Long> likedIds = getLikedPromptIds(userId, prompts);
+        Map<Long, Long> likeCountMap = getLikeCountMap(prompts);
+        List<PromptSummaryResponse> promptSummaries = promptMapper.toPromptSummaryResponseList(prompts, likedIds, likeCountMap);
 
-        return new PromptListResponse(promptSummaries, totalCount);
+        return new PromptListResponse(promptSummaries, promptPage.getTotalElements());
     }
 
     @Transactional
@@ -134,12 +137,12 @@ public class PromptService {
     @Transactional(readOnly = true)
     public PromptListResponse getPromptsSortedTime(Long categoryId, Long userId, Pageable pageable) {
         Page<PromptEntity> promptEntities = promptRepository.findPromptSortedTime(categoryId, pageable);
-        Set<Long> likedIds = getLikedPromptIds(userId, promptEntities.getContent());
-
-        List<PromptSummaryResponse> promptList = promptMapper.toPromptSummaryResponseList(promptEntities.getContent(), likedIds);
+        List<PromptEntity> prompts = promptEntities.getContent();
+        Set<Long> likedIds = getLikedPromptIds(userId, prompts);
+        Map<Long, Long> likeCountMap = getLikeCountMap(prompts);
 
         return new PromptListResponse(
-                promptList,
+                promptMapper.toPromptSummaryResponseList(prompts, likedIds, likeCountMap),
                 promptEntities.getTotalElements()
         );
     }
@@ -148,12 +151,12 @@ public class PromptService {
     @Transactional(readOnly = true)
     public PromptListResponse getPromptsSortedLikeCount(Long categoryId, Long userId, Pageable pageable) {
         Page<PromptEntity> promptEntities = promptRepository.findPromptSortedLikeCount(categoryId, pageable);
-        Set<Long> likedIds = getLikedPromptIds(userId, promptEntities.getContent());
-
-        List<PromptSummaryResponse> promptList = promptMapper.toPromptSummaryResponseList(promptEntities.getContent(), likedIds);
+        List<PromptEntity> prompts = promptEntities.getContent();
+        Set<Long> likedIds = getLikedPromptIds(userId, prompts);
+        Map<Long, Long> likeCountMap = getLikeCountMap(prompts);
 
         return new PromptListResponse(
-                promptList,
+                promptMapper.toPromptSummaryResponseList(prompts, likedIds, likeCountMap),
                 promptEntities.getTotalElements()
         );
     }
@@ -169,8 +172,9 @@ public class PromptService {
 
         List<PromptEntity> promptEntities = promptRepository.findDailyHotPrompts(start, end, topFive);
         Set<Long> likedIds = getLikedPromptIds(userId, promptEntities);
+        Map<Long, Long> likeCountMap = getLikeCountMap(promptEntities);
 
-        return promptMapper.toPromptSummaryResponseList(promptEntities, likedIds);
+        return promptMapper.toPromptSummaryResponseList(promptEntities, likedIds, likeCountMap);
     }
 
     // 좋아요 생성 (#32)
@@ -200,10 +204,12 @@ public class PromptService {
     @Transactional(readOnly = true)
     public PromptListResponse searchPromptsByTitle(String keyword, Long userId, Pageable pageable) {
         Page<PromptEntity> searchResult = promptRepository.findByTitleContaining(keyword, pageable);
-        Set<Long> likedIds = getLikedPromptIds(userId, searchResult.getContent());
+        List<PromptEntity> prompts = searchResult.getContent();
+        Set<Long> likedIds = getLikedPromptIds(userId, prompts);
+        Map<Long, Long> likeCountMap = getLikeCountMap(prompts);
 
         return new PromptListResponse(
-                promptMapper.toPromptSummaryResponseList(searchResult.getContent(), likedIds),
+                promptMapper.toPromptSummaryResponseList(prompts, likedIds, likeCountMap),
                 searchResult.getTotalElements()
         );
     }
@@ -218,8 +224,10 @@ public class PromptService {
         }
 
         Page<PromptEntity> promptPage = promptLikeRepository.findLikedPromptsByUserId(targetUserId, pageable);
-        Set<Long> likedIds = getLikedPromptIds(requestUserId, promptPage.getContent());
-        List<PromptSummaryResponse> summaries = promptMapper.toPromptSummaryResponseList(promptPage.getContent(), likedIds);
+        List<PromptEntity> prompts = promptPage.getContent();
+        Set<Long> likedIds = getLikedPromptIds(requestUserId, prompts);
+        Map<Long, Long> likeCountMap = getLikeCountMap(prompts);
+        List<PromptSummaryResponse> summaries = promptMapper.toPromptSummaryResponseList(prompts, likedIds, likeCountMap);
 
         return new PromptListResponse(summaries, promptPage.getTotalElements());
     }
@@ -248,6 +256,15 @@ public class PromptService {
         }
         List<Long> promptIds = prompts.stream().map(PromptEntity::getId).toList();
         return new HashSet<>(promptLikeRepository.findLikedPromptIdsByUserId(userId, promptIds));
+    }
+
+    private Map<Long, Long> getLikeCountMap(List<PromptEntity> prompts) {
+        if (prompts.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        List<Long> promptIds = prompts.stream().map(PromptEntity::getId).toList();
+        return promptLikeRepository.countByPromptIds(promptIds).stream()
+                .collect(Collectors.toMap(dto -> dto.getPromptId(), dto -> dto.getCount()));
     }
 
     private PromptResponse buildPromptResponse(PromptEntity prompt, Long requestUserId) {

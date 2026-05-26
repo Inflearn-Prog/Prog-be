@@ -13,7 +13,8 @@ public record PromptSummaryResponse(
         String contentSummary,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
-        boolean isLiked
+        boolean isLiked,
+        long likeCount
 ) {
 }
 
