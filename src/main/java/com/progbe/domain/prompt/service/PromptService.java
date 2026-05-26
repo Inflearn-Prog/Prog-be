@@ -245,7 +245,8 @@ public class PromptService {
         }
 
         Set<Long> likedIds = getLikedPromptIds(requestUserId, promptPage.getContent());
-        List<PromptSummaryResponse> summaries = promptMapper.toPromptSummaryResponseList(promptPage.getContent(), likedIds);
+        Map<Long, Long> likeCountMap = getLikeCountMap(promptPage.getContent());
+        List<PromptSummaryResponse> summaries = promptMapper.toPromptSummaryResponseList(promptPage.getContent(), likedIds, likeCountMap);
 
         return new PromptListResponse(summaries, promptPage.getTotalElements());
     }

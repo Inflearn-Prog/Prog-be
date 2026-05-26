@@ -25,6 +25,9 @@ public interface PromptLikeRepository extends JpaRepository<PromptLikeEntity, Lo
     @Query("SELECT pl.prompt.id FROM PromptLikeEntity pl WHERE pl.user.id = :userId AND pl.prompt.id IN :promptIds")
     List<Long> findLikedPromptIdsByUserId(@Param("userId") Long userId, @Param("promptIds") List<Long> promptIds);
 
+    @Query("SELECT pl.prompt.id as promptId, COUNT(pl) as count FROM PromptLikeEntity pl WHERE pl.prompt.id IN :promptIds GROUP BY pl.prompt.id")
+    List<PromptLikeCountDto> countByPromptIds(@Param("promptIds") List<Long> promptIds);
+
     @Query(value = "SELECT p FROM PromptEntity p " +
             "JOIN FETCH p.user " +
             "JOIN FETCH p.category " +
