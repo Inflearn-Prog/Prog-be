@@ -31,7 +31,7 @@ public class PromptCommentEntity extends BaseEntity {
                     foreignKeyDefinition = "FOREIGN KEY (prompt_id) REFERENCES prompts(prompt_id) ON DELETE CASCADE"))
     private PromptEntity prompt;
 
-    @Column(name = "comment", nullable = false)
+    @Column(name = "comment", nullable = false, length = 255)
     private String comment;
 
     @Column(name = "parent_id", nullable = true)
@@ -93,6 +93,7 @@ public class PromptCommentEntity extends BaseEntity {
                 .prompt(prompt)
                 .user(user)
                 .comment(request.comment())
+                .promptStatus(PromptStatus.PUBLIC)
                 .commentStatus(CommentStatus.PUBLIC)
                 .build();
     }
@@ -103,6 +104,7 @@ public class PromptCommentEntity extends BaseEntity {
                 .user(user)
                 .comment(request.comment())
                 .parentId(parentId)
+                .promptStatus(PromptStatus.PUBLIC)
                 .commentStatus(CommentStatus.PUBLIC)
                 .build();
     }
