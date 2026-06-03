@@ -1,6 +1,7 @@
 package com.progbe.domain.user.service;
 
 import com.progbe.domain.auth.client.SocialApiClient;
+import com.progbe.domain.auth.repository.RefreshTokenRepository;
 import com.progbe.domain.user.dto.UserLoginResult;
 import com.progbe.domain.user.dto.UserWithdrawalRequest;
 import com.progbe.domain.user.dto.UserWithdrawalResponse;
@@ -29,6 +30,7 @@ public class UserService {
     private final UserMapper userMapper;
     private final UserWithdrawalHistoryRepository userWithdrawalHistoryRepository;
     private final SocialApiClient socialApiClient;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     /**
      * 소셜 로그인 사용자를 등록하거나 기존 사용자 정보를 업데이트합니다.
@@ -41,6 +43,10 @@ public class UserService {
     public UserLoginResult registerOrUpdateUser(String provider, OAuth2Attributes attributes, String socialRefreshToken) {
         return userRepository.findBySocialProviderAndId(provider, attributes.providerId())
                 .map(user -> {
+                    if (user.getStatus() == UserStatus.DELETED) {
+                        throw new CustomException(ErrorCode.USER_NOT_FOUND);
+                    }
+
                     if (socialRefreshToken != null) {
                         user.getSocialLinks().stream()
                                 .filter(link -> link.getProvider().equalsIgnoreCase(provider))
@@ -99,6 +105,7 @@ public class UserService {
 
         // 연동 해제 성공 후 유저 삭제 처리
         user.delete();
+        refreshTokenRepository.revokeAllByUserId(user.getId());
 
         if (request != null && request.reason() != null) {
             userWithdrawalHistoryRepository.save(

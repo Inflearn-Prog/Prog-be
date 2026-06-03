@@ -11,6 +11,7 @@ import com.progbe.domain.user.dto.UserLoginResult;
 import com.progbe.domain.user.entity.UserEntity;
 import com.progbe.domain.user.repository.UserRepository;
 import com.progbe.domain.user.service.UserService;
+import com.progbe.domain.user.type.UserStatus;
 import com.progbe.global.error.ErrorCode;
 import com.progbe.global.error.exception.CustomException;
 import com.progbe.global.jwt.JwtTokenProvider;
@@ -103,6 +104,10 @@ public class AuthService {
         String userId = jwtTokenProvider.getSubject(oldRefreshToken);
         UserEntity user = userRepository.findById(Long.valueOf(userId))
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        if (user.getStatus() == UserStatus.DELETED) {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND);
+        }
 
         Authentication authentication = createAuthentication(user);
 
