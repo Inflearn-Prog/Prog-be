@@ -2,6 +2,8 @@ package com.progbe.global.error;
 
 import com.progbe.global.common.ApiResponse;
 import com.progbe.global.error.exception.CustomException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -13,6 +15,8 @@ import java.time.LocalDate;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     // Custom Exception을 상속받는 모든 사용자 지정 예외 처리
     @ExceptionHandler(CustomException.class)
@@ -71,6 +75,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     protected ResponseEntity<ApiResponse<Void>> handleException(Exception e) {
+        log.error("Unhandled exception", e);
+
         ApiResponse<Void> response = ApiResponse.fail(
                 String.valueOf(ErrorCode.INTERNAL_SERVER_ERROR.getStatus().value()),
                 ErrorCode.INTERNAL_SERVER_ERROR.name(),
