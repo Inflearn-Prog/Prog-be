@@ -19,10 +19,10 @@ public class AdminRequest {
             startDate = (startDate != null) ? startDate : today;
             endDate = (endDate != null) ? endDate : today;
 
-            validate();
+            validate(startDate, endDate);
         }
 
-        private void validate() {
+        private static void validate(LocalDate startDate, LocalDate endDate) {
             LocalDate today = LocalDate.now();
 
             if (startDate.isAfter(endDate)) {
