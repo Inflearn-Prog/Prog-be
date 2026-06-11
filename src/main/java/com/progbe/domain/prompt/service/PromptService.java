@@ -15,6 +15,7 @@ import com.progbe.domain.user.repository.UserProfileRepository;
 import com.progbe.domain.user.repository.UserRepository;
 import com.progbe.global.error.ErrorCode;
 import com.progbe.global.error.exception.CustomException;
+import com.progbe.global.logging.MeasureExecutionTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -201,9 +202,10 @@ public class PromptService {
     }
 
     // 프롬프트 검색 로직 (#33)
+    @MeasureExecutionTime(warnThresholdMs = 3000)
     @Transactional(readOnly = true)
     public PromptListResponse searchPromptsByTitle(String keyword, Long userId, Pageable pageable) {
-        Page<PromptEntity> searchResult = promptRepository.findByTitleContaining(keyword, pageable);
+        Page<PromptEntity> searchResult = promptRepository.findByTitleFullText(keyword, pageable);
         List<PromptEntity> prompts = searchResult.getContent();
         Set<Long> likedIds = getLikedPromptIds(userId, prompts);
         Map<Long, Long> likeCountMap = getLikeCountMap(prompts);
