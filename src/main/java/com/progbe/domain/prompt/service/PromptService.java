@@ -205,8 +205,7 @@ public class PromptService {
     @MeasureExecutionTime(warnThresholdMs = 3000)
     @Transactional(readOnly = true)
     public PromptListResponse searchPromptsByTitle(String keyword, Long userId, Pageable pageable) {
-        Page<PromptEntity> searchResult = promptRepository.findByTitleFullText(keyword, pageable);
-        List<PromptEntity> prompts = searchResult.getContent();
+        Page<PromptEntity> searchResult = promptRepository.findByTitleContaining(keyword, pageable);        List<PromptEntity> prompts = searchResult.getContent();
         Set<Long> likedIds = getLikedPromptIds(userId, prompts);
         Map<Long, Long> likeCountMap = getLikeCountMap(prompts);
 
