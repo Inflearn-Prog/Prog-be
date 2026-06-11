@@ -9,5 +9,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface MeasureExecutionTime {
 
-    long warnThresholdMs() default 300; //ms 단위 임계값. 초과 시 WARN 레벨로 출력되도록
+    long warnThresholdMs() default 3000; //ms 단위 임계값. 초과 시 WARN 레벨로 출력되도록. (google 3-second-rule 기준)
 }
