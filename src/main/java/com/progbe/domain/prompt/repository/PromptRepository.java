@@ -72,6 +72,17 @@ public interface PromptRepository extends JpaRepository<PromptEntity, Long> {
             "AND (:categoryId IS NULL OR p.category.id = :categoryId)")
     Page<PromptEntity> findPromptSortedLikeCount(@Param("categoryId") Long categoryId, Pageable pageable);
 
+    @Query(value = "SELECT * FROM prompts " +
+            "WHERE MATCH(title) AGAINST (:keyword IN BOOLEAN MODE) " +
+            "AND deleted_at IS NULL AND status = 'PUBLIC' " +
+            "ORDER BY created_at DESC",
+            countQuery = "SELECT COUNT(*) FROM prompts " +
+            "WHERE MATCH(title) AGAINST (:keyword IN BOOLEAN MODE) " +
+            "AND deleted_at IS NULL AND status = 'PUBLIC'",
+            nativeQuery = true)
+    Page<PromptEntity> findByTitleFullText(@Param("keyword") String keyword, Pageable pageable);
+
+
     @Query("SELECT p FROM PromptEntity p " +
             "JOIN FETCH p.user " +
             "JOIN FETCH p.category " +
@@ -79,7 +90,6 @@ public interface PromptRepository extends JpaRepository<PromptEntity, Long> {
             "AND p.deletedAt IS NULL AND p.status = 'PUBLIC' " +
             "ORDER BY p.createdAt DESC")
     Page<PromptEntity> findByTitleContaining(@Param("keyword") String keyword, Pageable pageable);
-
     @Query("SELECT p FROM PromptEntity p " +
             "JOIN FETCH p.user " +
             "JOIN FETCH p.category " +
