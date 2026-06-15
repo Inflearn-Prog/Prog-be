@@ -562,7 +562,6 @@ class TermsServiceTest {
         TermsEntity entity = TermsEntity.builder()
                 .title(title)
                 .required(required)
-                .link("https://example.com/terms/" + id)
                 .build();
         setIdViaReflection(entity, TermsEntity.class, id);
         return entity;
