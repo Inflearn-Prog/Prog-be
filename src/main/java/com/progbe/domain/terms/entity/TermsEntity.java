@@ -26,13 +26,9 @@ public class TermsEntity extends BaseEntity {
     @Column(nullable = false)
     private Boolean required;
 
-    @Column(nullable = false)
-    private String link;
-
     @Builder
-    public TermsEntity(String title, Boolean required, String link) {
+    public TermsEntity(String title, Boolean required) {
         this.title = title;
         this.required = required;
-        this.link = link;
     }
 }

@@ -15,8 +15,6 @@ public class TermsMapper {
                 .termId(entity.getId())
                 .title(entity.getTitle())
                 .isRequired(entity.getRequired())
-                .hasDetails(entity.getLink() != null && !entity.getLink().isBlank())
-                .link(entity.getLink())
                 .build();
     }
 
