@@ -8,10 +8,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("ByteLengthValidator - UTF-8 바이트 기준 저장 가능 크기 검증")
 class ByteLengthValidatorTest {
 
-    /** MySQL TEXT 컬럼 용량. 이 값을 넘으면 저장이 실패한다. */
     private static final int TEXT_COLUMN_CAPACITY = 65535;
-
-    /** 실제 적용값. TEXT 용량의 약 92% 로 여유를 둔다. */
     private static final int MAX = 60000;
 
     private boolean isValid(String content) {
@@ -39,9 +36,7 @@ class ByteLengthValidatorTest {
     void 이모지_20000자는_컬럼_용량을_초과하므로_거부한다() {
         String content = "😀".repeat(20000);
 
-        // 문자 수로는 20,000자라 기존 @Size(max=20000) 를 통과했다
         assertThat(content.codePointCount(0, content.length())).isEqualTo(20000);
-        // 그러나 실제로는 80,000 바이트라 TEXT 컬럼에 저장할 수 없다
         assertThat(ByteLengthValidator.utf8Length(content)).isEqualTo(80000);
         assertThat(ByteLengthValidator.utf8Length(content)).isGreaterThan(TEXT_COLUMN_CAPACITY);
 
@@ -71,11 +66,9 @@ class ByteLengthValidatorTest {
     @Test
     @DisplayName("본문에 박힌 base64 이미지는 거부한다 - 이미지 차단의 서버측 최종 방어선")
     void base64_이미지가_박힌_본문은_거부한다() {
-        // 50KB PNG 를 base64 로 인코딩하면 약 68,000자 (모두 ASCII 1바이트)
-        String base64 = "A".repeat(68267);
+        String base64 = "A".repeat(68267); // 50KB PNG 의 base64 길이
         String content = "<p>안녕하세요</p><img src=\"data:image/png;base64," + base64 + "\">";
 
-        // 평문 기준으로는 5자에 불과해 PlainTextLength 는 통과시킨다
         assertThat(PlainTextLengthValidator.stripHtml(content).length()).isEqualTo(5);
         assertThat(isValid(content)).isFalse();
     }
