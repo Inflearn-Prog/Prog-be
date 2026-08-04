@@ -54,7 +54,7 @@ public class AuthService {
         UserLoginResult loginResult = userService.registerOrUpdateUser(
                 provider,
                 oAuth2Attributes,
-                null
+                request.refreshToken()
         );
 
         UserEntity userEntity = loginResult.user();
