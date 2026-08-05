@@ -14,6 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -32,14 +35,14 @@ public class AdminService {
         LocalDate prevStartDate = startDate.minusDays(daysBetween);
         LocalDate prevEndDate = endDate.minusDays(daysBetween);
 
-        var currentCounts = statisticRepository.sumByTypeGrouped(
+        var currentCounts = toMap(statisticRepository.sumByTypeGrouped(
                 startDate.atStartOfDay(),
                 endDate.plusDays(1).atStartOfDay()
-        );
-        var previousCounts = statisticRepository.sumByTypeGrouped(
+        ));
+        var previousCounts = toMap(statisticRepository.sumByTypeGrouped(
                 prevStartDate.atStartOfDay(),
                 prevEndDate.plusDays(1).atStartOfDay()
-        );
+        ));
 
         AdminResponse.MetricInfo newUsers = buildMetricInfo(
                 StatisticType.NEW_USERS, currentCounts, previousCounts
@@ -58,6 +61,13 @@ public class AdminService {
                 newPrompts,
                 copyCount
         );
+    }
+
+    private static Map<StatisticType, Long> toMap(List<StatisticRepository.StatisticTypeCount> rows) {
+        return rows.stream().collect(Collectors.toMap(
+                StatisticRepository.StatisticTypeCount::getType,
+                StatisticRepository.StatisticTypeCount::getCount
+        ));
     }
 
     private void validateStatisticsReady(LocalDate endDate) {
