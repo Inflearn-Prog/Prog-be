@@ -31,6 +31,10 @@ public class TraceIdFilter implements Filter {
             chain.doFilter(request, response);
         } finally {
             MDC.remove(TRACE_ID);
+            // JwtAuthenticationFilter가 심어놓은 userId 정리.
+            // JwtAuthenticationFilter 자체에서 지우면 이 필터(가장 바깥쪽, LoggingFilter를 감쌈)보다
+            // 먼저 지워져서 LoggingFilter가 로그를 쓸 때 이미 사라진 상태가 됨 -> 따러서 여기서 정리
+            MDC.remove("userId");
         }
     }
 }
