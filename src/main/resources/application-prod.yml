@@ -4,7 +4,6 @@ spring:
       on-profile: prod
 
   datasource:
-    #TODO:도메인 이름 변경
     url: jdbc:mysql://plog-mysql:3306/plog?useSSL=false&allowPublicKeyRetrieval=true&characterEncoding=UTF-8&serverTimezone=Asia/Seoul
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
@@ -60,3 +59,8 @@ spring:
 app:
   cookie:
     secure: true
+
+logging:
+  api:
+    # 배포 테스트 기간 동안 100% 기록 (유니크 사용자 수 집계용) TODO: 테스트 끝나면 0.1로 낮출 예정
+    sampling-rate: 1.0
