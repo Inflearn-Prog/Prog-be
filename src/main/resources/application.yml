@@ -15,11 +15,25 @@ management:
       exposure:
         include: health,metrics
 
+server:
+  tomcat:
+    mbeanregistry:
+      enabled: true # tomcat.threads.* 메트릭은 MBean 레지스트리가 켜져있어야 수집되기에,, (기본 false)
+
 logging:
   api:
     sampling-rate: 0.1 # 정상(2xx)/빠른 요청 로그 샘플링 비율. 실패, 느린 요청은 항상 100% 기록토록
   metrics:
     interval-ms: 30000 # 스레드풀/커넥션풀 현황을 로그로 남기는 주기(3h)
+
+alert:
+  check-interval-ms: 300000 # 5xx/느린 요청 급증 체크 주기
+  elasticsearch:
+    url: ${ELASTICSEARCH_URL:http://elasticsearch:9200}
+    username: ${ELASTIC_USERNAME:}
+    password: ${ELASTIC_PASSWORD:}
+  discord:
+    webhook-url: ${DISCORD_WEBHOOK_URL:}
 
 jwt:
   secret: ${JWT_SECRET_KEY}
