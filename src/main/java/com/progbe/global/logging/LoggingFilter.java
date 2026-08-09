@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -36,7 +37,7 @@ import static net.logstash.logback.argument.StructuredArguments.entries;
 public class LoggingFilter implements Filter {
 
     private static final long SLOW_THRESHOLD_MS = 2000L;
-    private static final double SAMPLING_RATE = 0.1;
+    //private static final double SAMPLING_RATE = 0.1;
     private static final int MAX_BODY_LENGTH = 2000;
 
     private static final Set<String> EXCLUDED_PATHS = Set.of(
@@ -47,6 +48,9 @@ public class LoggingFilter implements Filter {
     );
 
     private final ObjectMapper objectMapper;
+
+    @Value("${logging.api.sampling-rate:0.1}")
+    private double samplingRate;
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -83,6 +87,7 @@ public class LoggingFilter implements Filter {
         try {
             Map<String, Object> entry = new LinkedHashMap<>();
             entry.put("traceId", MDC.get(TraceIdFilter.TRACE_ID));
+            entry.put("userId", MDC.get("userId"));
             entry.put("method", request.getMethod());
             entry.put("uri", request.getRequestURI());
             entry.put("query", maskQueryString(request.getQueryString())); // 쿼리 마스킹
@@ -100,12 +105,12 @@ public class LoggingFilter implements Filter {
             // entries()로 Map 필드들을 Elasticsearch 루트 레벨에 직접 저장
             // (log.info("API {}", json) 방식은 message 문자열 안에 묻혀 Kibana에서 필드 쿼리 불가)
             if (isFailure) {
-                log.error("API", entries(entry));
+                log.error("[API]", entries(entry));
             } else {
-                log.info("API", entries(entry));
+                log.info("[API]", entries(entry));
             }
         } catch (Exception e) {
-            log.warn("Failed to write API log", e);
+            log.warn("[Failed to write API log]", e);
         }
     }
 
@@ -162,7 +167,7 @@ public class LoggingFilter implements Filter {
     }
 
     private boolean shouldSample() {
-        return Math.random() < SAMPLING_RATE;
+        return Math.random() < samplingRate;
     }
 
     private String truncate(String text, int maxLength) {

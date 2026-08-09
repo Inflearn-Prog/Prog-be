@@ -5,6 +5,22 @@ spring:
         format_sql: true
         show_sql: true
 
+# 별도 포트(8081) — server.port(8080)와 분리-> Spring Security 필터체인을 타지 않고,
+# docker-compose에 퍼블리시하지 않으므로 컨테이너 내부에서만 접근 가능
+management:
+  server:
+    port: 8081
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics
+
+logging:
+  api:
+    sampling-rate: 0.1 # 정상(2xx)/빠른 요청 로그 샘플링 비율. 실패, 느린 요청은 항상 100% 기록토록
+  metrics:
+    interval-ms: 30000 # 스레드풀/커넥션풀 현황을 로그로 남기는 주기(3h)
+
 jwt:
   secret: ${JWT_SECRET_KEY}
   access-expiration: 1800000
