@@ -105,12 +105,12 @@ public class LoggingFilter implements Filter {
             // entries()로 Map 필드들을 Elasticsearch 루트 레벨에 직접 저장
             // (log.info("API {}", json) 방식은 message 문자열 안에 묻혀 Kibana에서 필드 쿼리 불가)
             if (isFailure) {
-                log.error("API", entries(entry));
+                log.error("[API]", entries(entry));
             } else {
-                log.info("API", entries(entry));
+                log.info("[API]", entries(entry));
             }
         } catch (Exception e) {
-            log.warn("Failed to write API log", e);
+            log.warn("[Failed to write API log]", e);
         }
     }
 

@@ -18,6 +18,8 @@ management:
 logging:
   api:
     sampling-rate: 0.1 # 정상(2xx)/빠른 요청 로그 샘플링 비율. 실패, 느린 요청은 항상 100% 기록토록
+  metrics:
+    interval-ms: 30000 # 스레드풀/커넥션풀 현황을 로그로 남기는 주기(3h)
 
 jwt:
   secret: ${JWT_SECRET_KEY}
