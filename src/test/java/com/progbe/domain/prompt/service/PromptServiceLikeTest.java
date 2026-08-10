@@ -6,6 +6,7 @@ import com.progbe.domain.prompt.dto.*;
 import com.progbe.domain.prompt.entity.PromptEntity;
 import com.progbe.domain.prompt.entity.PromptLikeEntity;
 import com.progbe.domain.prompt.mapper.PromptMapper;
+import com.progbe.domain.prompt.repository.PromptCommentRepository;
 import com.progbe.domain.prompt.repository.PromptLikeRepository;
 import com.progbe.domain.prompt.repository.PromptRepository;
 import com.progbe.domain.user.entity.UserEntity;
@@ -44,6 +45,7 @@ class PromptServiceLikeTest {
     @Mock private CategoryRepository categoryRepository;
     @Mock private UserRepository userRepository;
     @Mock private PromptLikeRepository promptLikeRepository;
+    @Mock private PromptCommentRepository promptCommentRepository;
     @Mock private UserProfileRepository userProfileRepository;
     @Spy  private PromptMapper promptMapper = new PromptMapper();
 

@@ -14,7 +14,8 @@ public record PromptSummaryResponse(
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
         boolean isLiked,
-        long likeCount
+        long likeCount,
+        long commentCount
 ) {
 }
 
