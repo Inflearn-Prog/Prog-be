@@ -6,6 +6,7 @@ import com.progbe.domain.prompt.dto.*;
 import com.progbe.domain.prompt.entity.PromptEntity;
 import com.progbe.domain.prompt.entity.PromptLikeEntity;
 import com.progbe.domain.prompt.mapper.PromptMapper;
+import com.progbe.domain.prompt.repository.PromptCommentRepository;
 import com.progbe.domain.prompt.repository.PromptLikeRepository;
 import com.progbe.domain.prompt.repository.PromptRepository;
 import com.progbe.domain.prompt.type.PromptStatus;
@@ -42,6 +43,7 @@ public class PromptService {
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
     private final PromptLikeRepository promptLikeRepository;
+    private final PromptCommentRepository promptCommentRepository;
     private final UserProfileRepository userProfileRepository;
     private final PromptMapper promptMapper;
 
@@ -95,7 +97,8 @@ public class PromptService {
         List<PromptEntity> prompts = promptPage.getContent();
         Set<Long> likedIds = getLikedPromptIds(userId, prompts);
         Map<Long, Long> likeCountMap = getLikeCountMap(prompts);
-        List<PromptSummaryResponse> promptSummaries = promptMapper.toPromptSummaryResponseList(prompts, likedIds, likeCountMap);
+        Map<Long, Long> commentCountMap = getCommentCountMap(prompts);
+        List<PromptSummaryResponse> promptSummaries = promptMapper.toPromptSummaryResponseList(prompts, likedIds, likeCountMap, commentCountMap);
 
         return new PromptListResponse(promptSummaries, promptPage.getTotalElements());
     }
@@ -141,9 +144,10 @@ public class PromptService {
         List<PromptEntity> prompts = promptEntities.getContent();
         Set<Long> likedIds = getLikedPromptIds(userId, prompts);
         Map<Long, Long> likeCountMap = getLikeCountMap(prompts);
+        Map<Long, Long> commentCountMap = getCommentCountMap(prompts);
 
         return new PromptListResponse(
-                promptMapper.toPromptSummaryResponseList(prompts, likedIds, likeCountMap),
+                promptMapper.toPromptSummaryResponseList(prompts, likedIds, likeCountMap, commentCountMap),
                 promptEntities.getTotalElements()
         );
     }
@@ -155,9 +159,10 @@ public class PromptService {
         List<PromptEntity> prompts = promptEntities.getContent();
         Set<Long> likedIds = getLikedPromptIds(userId, prompts);
         Map<Long, Long> likeCountMap = getLikeCountMap(prompts);
+        Map<Long, Long> commentCountMap = getCommentCountMap(prompts);
 
         return new PromptListResponse(
-                promptMapper.toPromptSummaryResponseList(prompts, likedIds, likeCountMap),
+                promptMapper.toPromptSummaryResponseList(prompts, likedIds, likeCountMap, commentCountMap),
                 promptEntities.getTotalElements()
         );
     }
@@ -174,8 +179,9 @@ public class PromptService {
         List<PromptEntity> promptEntities = promptRepository.findDailyHotPrompts(start, end, topFive);
         Set<Long> likedIds = getLikedPromptIds(userId, promptEntities);
         Map<Long, Long> likeCountMap = getLikeCountMap(promptEntities);
+        Map<Long, Long> commentCountMap = getCommentCountMap(promptEntities);
 
-        return promptMapper.toPromptSummaryResponseList(promptEntities, likedIds, likeCountMap);
+        return promptMapper.toPromptSummaryResponseList(promptEntities, likedIds, likeCountMap, commentCountMap);
     }
 
     // 좋아요 생성 (#32)
@@ -208,9 +214,10 @@ public class PromptService {
         Page<PromptEntity> searchResult = promptRepository.findByTitleContaining(keyword, pageable);        List<PromptEntity> prompts = searchResult.getContent();
         Set<Long> likedIds = getLikedPromptIds(userId, prompts);
         Map<Long, Long> likeCountMap = getLikeCountMap(prompts);
+        Map<Long, Long> commentCountMap = getCommentCountMap(prompts);
 
         return new PromptListResponse(
-                promptMapper.toPromptSummaryResponseList(prompts, likedIds, likeCountMap),
+                promptMapper.toPromptSummaryResponseList(prompts, likedIds, likeCountMap, commentCountMap),
                 searchResult.getTotalElements()
         );
     }
@@ -228,7 +235,8 @@ public class PromptService {
         List<PromptEntity> prompts = promptPage.getContent();
         Set<Long> likedIds = getLikedPromptIds(requestUserId, prompts);
         Map<Long, Long> likeCountMap = getLikeCountMap(prompts);
-        List<PromptSummaryResponse> summaries = promptMapper.toPromptSummaryResponseList(prompts, likedIds, likeCountMap);
+        Map<Long, Long> commentCountMap = getCommentCountMap(prompts);
+        List<PromptSummaryResponse> summaries = promptMapper.toPromptSummaryResponseList(prompts, likedIds, likeCountMap, commentCountMap);
 
         return new PromptListResponse(summaries, promptPage.getTotalElements());
     }
@@ -247,7 +255,8 @@ public class PromptService {
 
         Set<Long> likedIds = getLikedPromptIds(requestUserId, promptPage.getContent());
         Map<Long, Long> likeCountMap = getLikeCountMap(promptPage.getContent());
-        List<PromptSummaryResponse> summaries = promptMapper.toPromptSummaryResponseList(promptPage.getContent(), likedIds, likeCountMap);
+        Map<Long, Long> commentCountMap = getCommentCountMap(promptPage.getContent());
+        List<PromptSummaryResponse> summaries = promptMapper.toPromptSummaryResponseList(promptPage.getContent(), likedIds, likeCountMap, commentCountMap);
 
         return new PromptListResponse(summaries, promptPage.getTotalElements());
     }
@@ -266,6 +275,15 @@ public class PromptService {
         }
         List<Long> promptIds = prompts.stream().map(PromptEntity::getId).toList();
         return promptLikeRepository.countByPromptIds(promptIds).stream()
+                .collect(Collectors.toMap(dto -> dto.getPromptId(), dto -> dto.getCount()));
+    }
+
+    private Map<Long, Long> getCommentCountMap(List<PromptEntity> prompts) {
+        if (prompts.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        List<Long> promptIds = prompts.stream().map(PromptEntity::getId).toList();
+        return promptCommentRepository.countByPromptIds(promptIds).stream()
                 .collect(Collectors.toMap(dto -> dto.getPromptId(), dto -> dto.getCount()));
     }
 

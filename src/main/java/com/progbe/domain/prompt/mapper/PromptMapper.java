@@ -54,7 +54,7 @@ public class PromptMapper {
         );
     }
 
-    public PromptSummaryResponse toPromptSummaryResponse(PromptEntity prompt, boolean isLiked, long likeCount) {
+    public PromptSummaryResponse toPromptSummaryResponse(PromptEntity prompt, boolean isLiked, long likeCount, long commentCount) {
         UserEntity user = prompt.getUser();
         return new PromptSummaryResponse(
                 prompt.getId(),
@@ -66,13 +66,19 @@ public class PromptMapper {
                 prompt.getCreatedAt(),
                 prompt.getUpdatedAt(),
                 isLiked,
-                likeCount
+                likeCount,
+                commentCount
         );
     }
 
-    public List<PromptSummaryResponse> toPromptSummaryResponseList(List<PromptEntity> prompts, Set<Long> likedPromptIds, Map<Long, Long> likeCountMap) {
+    public List<PromptSummaryResponse> toPromptSummaryResponseList(List<PromptEntity> prompts, Set<Long> likedPromptIds, Map<Long, Long> likeCountMap, Map<Long, Long> commentCountMap) {
         return prompts.stream()
-                .map(p -> toPromptSummaryResponse(p, likedPromptIds.contains(p.getId()), likeCountMap.getOrDefault(p.getId(), 0L)))
+                .map(p -> toPromptSummaryResponse(
+                        p,
+                        likedPromptIds.contains(p.getId()),
+                        likeCountMap.getOrDefault(p.getId(), 0L),
+                        commentCountMap.getOrDefault(p.getId(), 0L)
+                ))
                 .collect(Collectors.toList());
     }
 }
